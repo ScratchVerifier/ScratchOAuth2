@@ -1,0 +1,4 @@
+*.db*
+__pycache__/
+*.pyc
+soa2.json
