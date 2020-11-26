@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS authings (
   redirect_uri text NOT NULL,
   scopes text NOT NULL,
   state text,
-  int expiry,
+  expiry integer,
   -- FK
   FOREIGN KEY(client_id) REFERENCES applications(client_id)
 );
