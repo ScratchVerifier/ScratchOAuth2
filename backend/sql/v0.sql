@@ -86,3 +86,5 @@ CREATE TABLE IF NOT EXISTS authings (
   -- FK
   FOREIGN KEY(client_id) REFERENCES applications(client_id)
 );
+
+PRAGMA user_version = 1;
