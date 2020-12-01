@@ -1,22 +1,28 @@
 from time import time
 from secrets import randbits
-from typing import Optional
+from typing import Optional, Tuple
 import asyncio
 import aiosqlite as sql
-from config import config, SHORT_EXPIRY
+from config import config, SHORT_EXPIRY, timestamp
 import objs
 
 __all__ = ['session', 'startup', 'teardown']
 
 lock = asyncio.Lock()
 
-class Session:
+class Database:
+    """Handle database interactions."""
+
     db: sql.Connection
 
-    def __init__(self, db):
+    def __init__(self, db: sql.Connection):
         self.db = db
 
+class Session(Database):
+    """Handle session database interactions."""
+
     async def get(self, session_id: int) -> Optional[objs.Session]:
+        """Get a Session object by ID."""
         query = "SELECT * FROM sessions WHERE session_id=?"
         async with lock:
             await self.db.execute(query, (session_id,))
@@ -52,7 +58,7 @@ async def upgrade(db: sql.Cursor):
             except sql.OperationalError as exc:
                 print(f'  Running script failed: {exc!s}')
 
-async def startup():
+async def startup() -> Tuple[sql.Connection, sql.Cursor]:
     """Create and return the database connection and its cursor."""
     dbw = await sql.connect(config['db'])
     dbw.row_factory = sql.Row
@@ -63,8 +69,11 @@ async def startup():
 dbw, cursor = asyncio.get_event_loop().run_until_complete(startup())
 
 session = Session(cursor)
+login = Login(cursor)
 
-async def teardown():
+async def teardown(app):
     """Shut down the database."""
+    print(timestamp(), 'Committing and closing DB.')
     await dbw.commit()
     await dbw.close()
+    await app['session'].close()

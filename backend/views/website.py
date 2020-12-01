@@ -4,11 +4,11 @@ from aiohttp import web
 
 class Website:
     """Serve the website. This only has use when Apache isn't available."""
-    def index(self, request: web.Request):
+    async def index(self, request: web.Request):
         """Redirect to /site"""
         raise web.HTTPMovedPermanently('/site')
 
-    def site(self, request: web.Request):
+    async def site(self, request: web.Request):
         """Serve files"""
         path = request.match_info.get('path', 'index.html').strip() or 'index.html'
         path = 'site/' + path
