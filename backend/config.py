@@ -1,3 +1,4 @@
+import time
 import json
 
 __all__ = ['config', 'SHORT_EXPIRY', 'LONG_EXPIRY']
@@ -10,3 +11,6 @@ SHORT_EXPIRY = 600
 LONG_EXPIRY = 3600*24*265
 
 globals().update(config.get('consts', {}))
+
+def timestamp() -> str:
+    return time.strftime('%Y-%m-%dT%H:%M:%SZ')

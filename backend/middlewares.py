@@ -3,7 +3,7 @@ import json
 import traceback
 import aiohttp
 from aiohttp import web
-from config import config, SHORT_EXPIRY
+from config import config, SHORT_EXPIRY, timestamp
 import db
 
 # log requests
@@ -17,11 +17,11 @@ async def errors(request: web.Request, handler):
     Returns whatever the ``handler`` returns, or raises some exception.
     """
     print('%s %s %s' % (
-        time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        timestamp(),
         request.method,
         request.path_qs
     ))
-    _debug = request.config_dict['debug']
+    _debug = request.config_dict.get('debug', False)
     try:
         return await handler(request)
     except web.HTTPException as exc:
