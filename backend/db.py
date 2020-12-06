@@ -1,5 +1,5 @@
 from time import time
-from secrets import randbits, token_hex
+from secrets import randbits
 from typing import Optional, Tuple
 import asyncio
 import aiosqlite as sql
@@ -40,20 +40,6 @@ class Session(Database):
         query = "INSERT INTO sessions (session_id, expiry) VALUES (?, ?)"
         await self.db.execute(query, (session_id, expiry))
         return session_id
-
-class Login(Database):
-    """Handle login database interactions."""
-
-    db: sql.Connection
-
-    async def nonce(self, session_id: int) -> str:
-        """Generate, set, and return a nonce."""
-        nonce = token_hex(32) # Step 18
-        # Step 19
-        query = "UPDATE sessions SET nonce=? WHERE session_id=?"
-        await self.db.execute(query, (nonce, session_id))
-        # Step 20
-        return nonce
 
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
