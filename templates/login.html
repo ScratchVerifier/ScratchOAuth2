@@ -58,13 +58,15 @@
                 <h2 class="m-0 center">Login</h2>
             </div>
             <div class="Box-row">
-                <div>
+                <div><form method="POST">
+                    <div class="text-red bold" style="display: var(failed)">Could not find the comment on your profile. Please post it.</div>
                     <div class="form-group-header">
                         <label for="username-input">Username</label><br>
                     </div>
                     <div class="form-group-body">
-                        <input class="form-control input-block" type="text" value="" id="username-input"
-                            oninput="change()" />
+                        <input class="form-control input-block" type="text" value="var(username)" id="username-input"
+                            oninput="change()" name="username" />
+                        <input type="hidden" value="var(returnto)" name="returnto" />
                     </div><br>
                     <div id="codeDisplay">
                         <div class="form-group-header">
@@ -91,10 +93,8 @@
                     </div>
                     <div id="validationError" style="display:none;" class="text-red bold"></div>
                     <br>
-                    <button type="button" id="doneButton" class="btn btn-primary btn-block">
-                        Done
-                    </button>
-                </div>
+                    <input type="submit" id="doneButton" class="btn btn-primary btn-block" value="Done" />
+                </form></div>
             </div>
         </div>
     </div>
@@ -128,7 +128,6 @@
             document.querySelector("#doneButton").setAttribute("aria-disabled", "true")
             document.querySelector("#doneButton").disabled = true
         }
-        validationFailure("Please enter a username.")
         function change() {
             const username = document.querySelector("#username-input").value
             if (!username) return validationFailure("Please enter a username.")
@@ -148,12 +147,16 @@
                     document.querySelector("#code").value = x
                 })
         }
+        change()
         function cpy() {
             if (document.querySelector("#code").value) {
                 navigator.clipboard.writeText(document.querySelector("#code").value)
             }
         }
-        $.getJSON('/login/nonce', data => { nonce = data.nonce })
+        $.getJSON('/login/nonce', data => {
+            nonce = data.nonce
+            change()
+        })
     </script>
 </body>
 
