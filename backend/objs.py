@@ -7,3 +7,7 @@ class Session(NamedTuple):
     expiry: int # unix epoch time
     authing: Optional[str] # token-getter code
     nonce: Optional[str] # for logging in
+
+class Nonce(NamedTuple):
+    """Object containing nonce"""
+    nonce: str # the nonce lol

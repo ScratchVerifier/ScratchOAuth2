@@ -6,7 +6,7 @@ class Website:
     """Serve the website. This only has use when Apache isn't available."""
     async def index(self, request: web.Request):
         """Redirect to /site"""
-        raise web.HTTPMovedPermanently('/site')
+        return web.HTTPMovedPermanently('/site')
 
     async def site(self, request: web.Request):
         """Serve files"""
