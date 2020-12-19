@@ -1,7 +1,5 @@
-import time
 import json
 import traceback
-import aiohttp
 from aiohttp import web
 from config import config, SHORT_EXPIRY, timestamp
 import db

@@ -3,7 +3,7 @@ from secrets import randbits, token_hex
 from typing import Optional, Tuple
 import asyncio
 import aiosqlite as sql
-from config import config, SHORT_EXPIRY, timestamp
+from config import LONG_EXPIRY, config, SHORT_EXPIRY, timestamp
 import objs
 
 __all__ = ['session', 'startup', 'teardown']
@@ -54,6 +54,28 @@ class Login(Database):
         await self.db.execute(query, (nonce, session_id))
         # Step 20
         return nonce
+
+    async def save_user(self, user_id: int, user_name: str):
+        """Set or update user information."""
+        query1 = "INSERT OR IGNORE INTO scratch_users(user_id) VALUES (?)"
+        query2 = "UPDATE scratch_users SET user_name=? WHERE user_id=?"
+        async with lock:
+            await self.db.execute(query1, (user_id,))
+            await self.db.execute(query2, (user_name, user_id))
+
+    async def login_session(self, session_id: int, user_id: int):
+        """Mark a session as logged in."""
+        expiry: int = LONG_EXPIRY
+        # Step 30-32
+        query = "UPDATE sessions SET user_id=?, expiry=?, nonce=NULL " \
+            "WHERE session_id=?"
+        await self.db.execute(query, (user_id, expiry, session_id))
+
+    async def logout(self, session_id: int):
+        expiry: int = SHORT_EXPIRY
+        query = "UPDATE sessions SET user_id=NULL, expiry=?, " \
+            "nonce=NULL WHERE session_id=?"
+        await self.db.execute(query, (expiry, session_id))
 
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
