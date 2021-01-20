@@ -28,7 +28,7 @@ async def errors(request: web.Request, handler):
     except json.JSONDecodeError:
         raise web.HTTPBadRequest() from None
     except Exception as exc:
-        print('Error in', handler.__name__,
+        print('Error in', f'{request.method} {request.path}',
               end='' if _debug else '\n')
         if _debug:
             print(':')
@@ -68,7 +68,7 @@ async def errors(request: web.Request, handler):
                     ]
                 }]
             })
-        raise web.HTTPInternalServerError()
+        raise web.HTTPInternalServerError() from exc
 
 # Step 8
 @web.middleware

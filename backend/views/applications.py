@@ -66,11 +66,14 @@ class Applications:
         if (
             not isinstance(app_name, (str, type(None), type(...)))
             or not isinstance(redirect_uris, (list, type(None)))
-            or any(not isinstance(uri, str) for uri in redirect_uris)
+            or any(not isinstance(uri, str) for uri in redirect_uris or [])
         ):
             raise web.HTTPBadRequest()
-        app = await db.apps.update_app(client_id, client_secret,
-                                       app_name, redirect_uris)
+        try:
+            app = await db.apps.update_app(client_id, client_secret,
+                                           app_name, redirect_uris)
+        except ValueError:
+            raise web.HTTPBadRequest() from None
         return web.json_response(app._asdict())
 
     async def delete(self, request: web.Request):

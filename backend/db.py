@@ -55,8 +55,8 @@ class Login(Database):
 
     async def save_user(self, user_id: int, user_name: str):
         """Set or update user information."""
-        query1 = "INSERT OR IGNORE INTO scratch_users(user_id) VALUES (?)"
-        query2 = "UPDATE scratch_users SET user_name=? WHERE user_id=?"
+        query1 = "DELETE FROM scratch_users WHERE user_id=?"
+        query2 = "INSERT INTO scratch_users (user_name, user_id) VALUES (?, ?)"
         async with lock:
             await self.db.execute(query1, (user_id,))
             await self.db.execute(query2, (user_name, user_id))
@@ -101,12 +101,14 @@ class Applications(Database):
             row = await self.db.fetchone()
         if row is None:
             return None
+        data = dict(row)
+        data['approved'] = bool(data['approved'])
         query2 = "SELECT redirect_uri FROM redirect_uris WHERE client_id=?"
         async with lock:
             await self.db.execute(query2, (client_id,))
-            data = await self.db.fetchall()
-        uris = [r[0] for r in data]
-        return objs.Application(redirect_uris=uris, **row)
+            rows = await self.db.fetchall()
+        uris = [row[0] for row in rows]
+        return objs.Application(redirect_uris=uris, **data)
 
     async def create_app(self, owner_id: int, app_name: Optional[str],
                          redirect_uris: List[str]):
@@ -142,7 +144,7 @@ class Applications(Database):
             await self.db.execute(query1, params)
         elif redirect_uris is None:
             raise ValueError('No update made')
-        else:
+        if redirect_uris is not None:
             query2 = "DELETE FROM redirect_uris WHERE client_id=?"
             query3 = "INSERT INTO redirect_uris (client_id, redirect_uri) " \
                 "VALUES (?, ?)"
