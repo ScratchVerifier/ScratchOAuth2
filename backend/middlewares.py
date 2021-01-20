@@ -3,6 +3,7 @@ import traceback
 from aiohttp import web
 from config import config, SHORT_EXPIRY, timestamp
 import db
+import views
 
 # log requests
 @web.middleware
@@ -92,4 +93,4 @@ async def cookie_check(request: web.Request, handler):
     request['session'] = session
     return await handler(request)
 
-middlewares = [cookie_check, errors]
+middlewares = [cookie_check, errors, views.applications.check_login]

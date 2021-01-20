@@ -22,5 +22,5 @@ class Application(NamedTuple):
     client_id: int
     client_secret: str
     app_name: str
-    name_approved: bool
+    approved: bool # whether app name is approved
     redirect_uris: List[str]

@@ -83,7 +83,6 @@ class Login:
         if session.nonce is None:
             raise web.HTTPNotFound()
         code = self.gen_code('login', session.nonce, username)
-        # TODO: Step 27-32
         async with request.config_dict['session'].get(COMMENTS_API.format(
             username, timestamp()
         )) as resp: # Step 27
