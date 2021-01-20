@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS redirect_uris (
 -- transient data
 
 DROP TABLE IF EXISTS sessions;
-CREATE TABLE sessions (
+CREATE TEMPORARY TABLE sessions (
   session_id integer PRIMARY KEY,
   -- Scratch user ID of session owner
   user_id integer,
