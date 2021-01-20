@@ -26,6 +26,11 @@ CREATE TABLE IF NOT EXISTS applications (
   FOREIGN KEY(owner_id) REFERENCES scratch_users(user_id)
 );
 
+CREATE TRIGGER IF NOT EXISTS reset_approval AFTER UPDATE OF app_name ON applications
+BEGIN UPDATE applications SET approved=(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
+CREATE TRIGGER IF NOT EXISTS set_approval AFTER INSERT ON applications
+BEGIN UPDATE applications SET approved=(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
+
 CREATE TABLE IF NOT EXISTS approvals (
   -- refresh token to get new access token
   refresh_token text PRIMARY KEY,
