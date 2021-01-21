@@ -1,6 +1,7 @@
 import time
 import re
 import json
+from aiohttp import web
 
 __all__ = ['config', 'SHORT_EXPIRY', 'LONG_EXPIRY']
 
@@ -27,3 +28,12 @@ globals().update(config.get('consts', {}))
 
 def timestamp() -> str:
     return time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+async def error(title: str, message: str, status: int = 400):
+    """Helper function to throw an HTML 400 page."""
+    with open('templates/error.html', 'r') as f:
+        data = f.read()
+    data = (data.replace('__status__', str(status))
+            .replace('__message__', message)
+            .replace('__title__', title))
+    return web.Response(status=status, text=data, content_type='text/html')
