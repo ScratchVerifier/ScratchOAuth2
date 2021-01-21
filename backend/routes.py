@@ -5,3 +5,4 @@ def setup_routes(app: web.Application):
     """Add routes from the various views."""
     app.add_routes(views.website.routes)
     app.add_routes(views.login.routes)
+    app.add_routes(views.applications.routes)

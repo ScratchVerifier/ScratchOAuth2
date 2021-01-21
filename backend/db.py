@@ -1,6 +1,6 @@
 from time import time
 from secrets import randbits, token_hex
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import asyncio
 import aiosqlite as sql
 from config import LONG_EXPIRY, config, SHORT_EXPIRY, timestamp
@@ -44,8 +44,6 @@ class Session(Database):
 class Login(Database):
     """Handle login database interactions."""
 
-    db: sql.Connection
-
     async def nonce(self, session_id: int) -> str:
         """Generate, set, and return a nonce."""
         nonce = token_hex(32) # Step 18
@@ -57,8 +55,8 @@ class Login(Database):
 
     async def save_user(self, user_id: int, user_name: str):
         """Set or update user information."""
-        query1 = "INSERT OR IGNORE INTO scratch_users(user_id) VALUES (?)"
-        query2 = "UPDATE scratch_users SET user_name=? WHERE user_id=?"
+        query1 = "DELETE FROM scratch_users WHERE user_id=?"
+        query2 = "INSERT INTO scratch_users (user_name, user_id) VALUES (?, ?)"
         async with lock:
             await self.db.execute(query1, (user_id,))
             await self.db.execute(query2, (user_name, user_id))
@@ -76,6 +74,95 @@ class Login(Database):
         query = "UPDATE sessions SET user_id=NULL, expiry=?, " \
             "nonce=NULL WHERE session_id=?"
         await self.db.execute(query, (expiry, session_id))
+
+class Applications(Database):
+    """Handle client registration and management."""
+
+    async def applications(self, owner_id: Optional[int]):
+        """Get a list of partial applications."""
+        query = "SELECT client_id, app_name FROM applications WHERE owner_id=?"
+        async with lock:
+            await self.db.execute(query, (owner_id,))
+            data = await self.db.fetchall()
+        return [objs.PartialApplication(**row) for row in data]
+
+    async def application(self, owner_id: Optional[int], client_id: int):
+        """Get a specific application."""
+        if owner_id is not None:
+            query1 = "SELECT client_id, client_secret, app_name, approved " \
+                "FROM applications WHERE owner_id=? AND client_id=?"
+            params = (owner_id, client_id)
+        else:
+            query1 = "SELECT client_id, client_secret, app_name, approved " \
+                "FROM applications WHERE client_id=?"
+            params = (client_id,)
+        async with lock:
+            await self.db.execute(query1, params)
+            row = await self.db.fetchone()
+        if row is None:
+            return None
+        data = dict(row)
+        data['approved'] = bool(data['approved'])
+        query2 = "SELECT redirect_uri FROM redirect_uris WHERE client_id=?"
+        async with lock:
+            await self.db.execute(query2, (client_id,))
+            rows = await self.db.fetchall()
+        uris = [row[0] for row in rows]
+        return objs.Application(redirect_uris=uris, **data)
+
+    async def create_app(self, owner_id: int, app_name: Optional[str],
+                         redirect_uris: List[str]):
+        """Register a new application."""
+        # Step 2
+        client_id = randbits(32)
+        client_secret = token_hex(64)
+        # Step 3
+        query1 = "INSERT INTO applications (client_id, client_secret, " \
+            "app_name, owner_id) VALUES (?, ?, ?, ?)"
+        await self.db.execute(query1, (client_id, client_secret,
+                                       app_name, owner_id))
+        # Step 4
+        query2 = "INSERT INTO redirect_uris (client_id, redirect_uri) " \
+            "VALUES (?, ?)"
+        await self.db.executemany(query2, ((client_id, uri) for uri in redirect_uris))
+        return await self.application(owner_id, client_id)
+
+    async def update_app(self, client_id: int, client_secret: str = None,
+                         app_name: str = ..., redirect_uris: List[str] = None):
+        """Update data for an application."""
+        query1 = "UPDATE applications SET "
+        params = {}
+        params['client_id'] = client_id
+        if client_secret is not None:
+            params['client_secret'] = token_hex(64)
+            query1 += "client_secret=:client_secret, "
+        if app_name is not ...:
+            params['app_name'] = app_name
+            query1 += "app_name=:app_name, "
+        if query1.endswith(', '):
+            query1 = query1[:-2] + " WHERE client_id=:client_id"
+            await self.db.execute(query1, params)
+        elif redirect_uris is None:
+            raise ValueError('No update made')
+        if redirect_uris is not None:
+            query2 = "DELETE FROM redirect_uris WHERE client_id=?"
+            query3 = "INSERT INTO redirect_uris (client_id, redirect_uri) " \
+                "VALUES (?, ?)"
+            await self.db.execute(query2, (client_id,))
+            await self.db.executemany(
+                query3, ((client_id, uri) for uri in redirect_uris))
+        return await self.application(None, client_id)
+
+    async def delete_app(self, client_id: int):
+        """Delete an application."""
+        querys = (
+            "DELETE FROM redirect_uris WHERE client_id=?",
+            "DELETE FROM approvals WHERE client_id=?",
+            "DELETE FROM authings WHERE client_id=?",
+            "DELETE FROM applications WHERE client_id=?"
+        )
+        for query in querys:
+            await self.db.execute(query, (client_id,))
 
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
@@ -106,6 +193,7 @@ dbw, cursor = asyncio.get_event_loop().run_until_complete(startup())
 
 session = Session(cursor)
 login = Login(cursor)
+apps = Applications(cursor)
 
 async def teardown(app):
     """Shut down the database."""

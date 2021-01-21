@@ -3,6 +3,7 @@ import traceback
 from aiohttp import web
 from config import config, SHORT_EXPIRY, timestamp
 import db
+import views
 
 # log requests
 @web.middleware
@@ -27,7 +28,7 @@ async def errors(request: web.Request, handler):
     except json.JSONDecodeError:
         raise web.HTTPBadRequest() from None
     except Exception as exc:
-        print('Error in', handler.__name__,
+        print('Error in', f'{request.method} {request.path}',
               end='' if _debug else '\n')
         if _debug:
             print(':')
@@ -67,7 +68,7 @@ async def errors(request: web.Request, handler):
                     ]
                 }]
             })
-        raise web.HTTPInternalServerError()
+        raise web.HTTPInternalServerError() from exc
 
 # Step 8
 @web.middleware
@@ -92,4 +93,4 @@ async def cookie_check(request: web.Request, handler):
     request['session'] = session
     return await handler(request)
 
-middlewares = [cookie_check, errors]
+middlewares = [cookie_check, errors, views.applications.check_login]
