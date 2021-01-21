@@ -1,3 +1,4 @@
+from html import escape
 from urllib.parse import quote
 from aiohttp import web
 import db
@@ -63,6 +64,17 @@ class Authorization:
         """Cancel the confirmation."""
         return web.Response(text='')
 
+    async def showcode(self, request: web.Request):
+        """Show the auth code to copy into an app that has no server."""
+        try:
+            code = request.query['code']
+        except KeyError:
+            return await error('Authorization Failed', 'Missing authorization code')
+        with open('templates/code.html', 'r') as f:
+            data = f.read()
+        data = data.replace('__code__', escape(code))
+        return web.Response(text=data, content_type='text/html')
+
 @web.middleware
 async def check_login(request: web.Request, handler):
     """Redirect non-logged-in requests to login first."""
@@ -77,4 +89,5 @@ routes = [
     web.get('/authorize', auth.page),
     web.post('/authorize', auth.confirm),
     web.delete('/authorize', auth.cancel),
+    web.get('/showcode', auth.showcode)
 ]
