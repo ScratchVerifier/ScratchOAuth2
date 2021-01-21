@@ -25,9 +25,10 @@ class Login:
         with open('templates/login.html', 'r') as f:
             data = f.read()
         failed = 'failed' in request.query
-        data = (data.replace('var(username)', escape(request.query.get('username', '')))
-                .replace('var(returnto)', escape(returnto))
-                .replace('var(failed)', 'block' if failed else 'none'))
+        data = (data.replace('__username__',
+                             escape(request.query.get('username', '')))
+                .replace('__returnto__', escape(returnto))
+                .replace('__failed__', 'block' if failed else 'none'))
         # Step 22
         return web.Response(text=data, content_type='text/html')
 
