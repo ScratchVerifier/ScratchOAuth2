@@ -77,6 +77,12 @@ class Authorization:
 
     async def cancel(self, request: web.Request):
         """Cancel the confirmation."""
+        session: objs.Session = request['session']
+        auth = await self.check_is_authing(request)
+        if not isinstance(auth, objs.Authing):
+            return auth
+        await db.auth.cancel_auth(session.session_id, auth.code)
+        return web.HTTPSeeOther('/')
 
     async def check_is_authing(self, request: web.Request):
         session: objs.Session = request['session']
