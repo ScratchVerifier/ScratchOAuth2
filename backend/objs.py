@@ -31,5 +31,5 @@ class Authing(NamedTuple):
     client_id: int
     redirect_uri: str
     scopes: List[str]
-    state: str
-    expiry: int
+    state: Optional[str]
+    expiry: Optional[int]
