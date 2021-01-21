@@ -10,6 +10,7 @@ class Authorization:
 
     async def page(self, request: web.Request):
         """Display the confirmation page."""
+        session: objs.Session = request['session']
         # Step 34
         state = request.query.get('state', None)
         client_id = request.query.get('client_id', None)
@@ -34,7 +35,11 @@ class Authorization:
         if redirect_uri != '/showcode':
             if redirect_uri not in app.redirect_uris:
                 return await error(INVALID_AUTH_TITLE, INVALID_AUTH_TEXT)
-        # assemble auth page
+        if session.authing is None:
+            # this is against the GET specification, but it's the best I can do
+            await db.auth.start_auth(
+                session.session_id, state, client_id, redirect_uri, scopes)
+        # Step 38
         with open('templates/auth.html', 'r') as f:
             data = f.read()
         if app.app_name is None:

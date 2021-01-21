@@ -24,3 +24,12 @@ class Application(NamedTuple):
     app_name: Optional[str]
     approved: bool # whether app name is approved
     redirect_uris: List[str]
+
+class Authing(NamedTuple):
+    """Authorization process data"""
+    code: str
+    client_id: int
+    redirect_uri: str
+    scopes: List[str]
+    state: str
+    expiry: int
