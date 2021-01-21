@@ -15,12 +15,12 @@ class Nonce(NamedTuple):
 class PartialApplication(NamedTuple):
     """Partial application data to be fetched in a list"""
     client_id: int
-    app_name: str # regardless of approval
+    app_name: Optional[str] # regardless of approval
 
 class Application(NamedTuple):
     """Application data"""
     client_id: int
     client_secret: str
-    app_name: str
+    app_name: Optional[str]
     approved: bool # whether app name is approved
     redirect_uris: List[str]
