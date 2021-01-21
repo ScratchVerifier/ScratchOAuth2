@@ -34,7 +34,15 @@ class Authorization:
         if redirect_uri != '/showcode':
             if redirect_uri not in app.redirect_uris:
                 return await error(INVALID_AUTH_TITLE, INVALID_AUTH_TEXT)
-        return web.Response(text='')
+        # assemble auth page
+        with open('templates/auth.html', 'r') as f:
+            data = f.read()
+        data = (data.replace('__appname__', app.app_name or 'this app')
+                .replace('__scopes__', '\n'.join(
+                    '<li>%s</li>' % SCOPES_DESC[scope]['en']
+                    for scope in scopes
+                )))
+        return web.Response(text=data, content_type='text/html')
 
     async def confirm(self, request: web.Request):
         """Complete the confirmation."""
