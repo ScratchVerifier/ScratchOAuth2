@@ -207,6 +207,13 @@ class Authorization(Database):
         query2 = "UPDATE sessions SET authing=? WHERE session_id=?"
         await self.db.execute(query2, (code, session_id))
 
+    async def cancel_auth(self, session_id: int, code: str):
+        """Erase an approval process' records."""
+        query1 = "UPDATE sessions SET authing=NULL WHERE session_id=?"
+        await self.db.execute(query1, (session_id,))
+        query2 = "DELETE FROM authings WHERE code=?"
+        await self.db.execute(query2, (code,))
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
