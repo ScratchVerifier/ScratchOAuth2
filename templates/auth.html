@@ -24,7 +24,25 @@
 			padding-left: revert;
 			margin-bottom: revert;
 		}
+		.unmoderated {
+			background-color: #202225;
+			border-radius: 3px;
+			border: 1.5px solid gray;
+		}
+		.unmoderated.shown {
+			background-color: rgba(0, 0, 0, .1);
+		}
+		.unmoderated span:last-child, .unmoderated.shown span:first-child {
+			display: none;
+		}
+		.unmoderated.shown span:last-child, .unmoderated span:first-child {
+			display: inline;
+		}
+		.unmoderated span:first-child {
+			color: #dcddde;
+		}
 	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 	<div class="Box box-shadow" id="authBox">
@@ -42,5 +60,11 @@
 			</form></div>
 		</div>
 	</div>
+	<script>
+		$('.unmoderated').click((e) => {
+			$('.unmoderated').toggleClass('shown');
+		}).attr('title', 'App name has not been moderated yet. Click to reveal.')
+		$('<span>[unmoderated app name]</span>').insertBefore('.unmoderated span')
+	</script>
 </body>
 </html>

@@ -37,7 +37,13 @@ class Authorization:
         # assemble auth page
         with open('templates/auth.html', 'r') as f:
             data = f.read()
-        data = (data.replace('__appname__', app.app_name or 'this app')
+        if app.app_name is None:
+            name = '[unnamed app]'
+        elif not app.approved:
+            name = f'<span class="unmoderated"><span>{app.app_name}</span></span>'
+        else:
+            name = app.app_name
+        data = (data.replace('__appname__', name)
                 .replace('__scopes__', '\n'.join(
                     '<li>%s</li>' % SCOPES_DESC[scope]['en']
                     for scope in scopes
