@@ -1,3 +1,4 @@
+from urllib.parse import quote
 from aiohttp import web
 import db
 import objs
@@ -20,6 +21,10 @@ class Authorization:
 @web.middleware
 async def check_login(request: web.Request, handler):
     """Redirect non-logged-in requests to login first."""
+    session: objs.Session = request['session']
+    # Step 12-14
+    if request.path.startswith('/authorize') and session.user_id is None:
+        raise web.HTTPSeeOther('/login?returnto=' + quote(request.path_qs))
     return await handler(request)
 
 auth = Authorization()
