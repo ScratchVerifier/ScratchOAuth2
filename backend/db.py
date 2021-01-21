@@ -167,17 +167,26 @@ class Applications(Database):
 class Authorization(Database):
     """Handle app approval."""
 
-    async def get_authing_by_creator(self, client_id: int, state: str):
+    async def get_authing(self, query: str, params: Tuple):
         """Fetch data for an ongoing approval process."""
-        query = "SELECT * FROM authings WHERE client_id=? AND state=?"
         async with lock:
-            await self.db.execute(query, (client_id, state))
+            await self.db.execute(query, params)
             row = await self.db.fetchone()
         if row is None:
             return None
         data = dict(row)
         data['scopes'] = data['scopes'].split()
         return objs.Authing(**data)
+
+    async def get_authing_by_creator(self, client_id: int, state: str):
+        """Fetch ongoing approval data by a (client_id, state) pair."""
+        query = "SELECT * FROM authings WHERE client_id=? AND state=?"
+        return await self.get_authing(query, (client_id, state))
+
+    async def get_authing_by_code(self, code: str):
+        """Fetch ongoing approval data by the code."""
+        query = "SELECT * FROM authings WHERE code=?"
+        return await self.get_authing(query, (code,))
 
     async def start_auth(self, session_id: int, state: str, client_id: int,
                          redirect_uri: str, scopes: List[str]):
@@ -197,6 +206,13 @@ class Authorization(Database):
         # Step 37
         query2 = "UPDATE sessions SET authing=? WHERE session_id=?"
         await self.db.execute(query2, (code, session_id))
+
+    async def cancel_auth(self, session_id: int, code: str):
+        """Erase an approval process' records."""
+        query1 = "UPDATE sessions SET authing=NULL WHERE session_id=?"
+        await self.db.execute(query1, (session_id,))
+        query2 = "DELETE FROM authings WHERE code=?"
+        await self.db.execute(query2, (code,))
 
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""

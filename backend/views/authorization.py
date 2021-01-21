@@ -1,4 +1,5 @@
-from urllib.parse import quote
+from html import escape
+from urllib.parse import quote, urlencode
 from aiohttp import web
 import db
 import objs
@@ -55,13 +56,55 @@ class Authorization:
                 )))
         return web.Response(text=data, content_type='text/html')
 
+    # Step 39
     async def confirm(self, request: web.Request):
         """Complete the confirmation."""
-        return web.Response(text='')
+        auth = await self.check_is_authing(request)
+        if not isinstance(auth, objs.Authing):
+            return auth
+        data = await request.post()
+        action = str(data.get('action', ''))
+        if action.casefold() == 'cancel':
+            return await self.cancel(request)
+        url = auth.redirect_uri
+        params = urlencode({'code': auth.code, 'state': auth.state})
+        if '?' in url:
+            url += '&' + params
+        else:
+            url += '?' + params
+        # Step 42
+        return web.HTTPSeeOther(url)
 
     async def cancel(self, request: web.Request):
         """Cancel the confirmation."""
-        return web.Response(text='')
+        session: objs.Session = request['session']
+        auth = await self.check_is_authing(request)
+        if not isinstance(auth, objs.Authing):
+            return auth
+        await db.auth.cancel_auth(session.session_id, auth.code)
+        return web.HTTPSeeOther('/')
+
+    async def check_is_authing(self, request: web.Request):
+        session: objs.Session = request['session']
+        if session.authing is None:
+            return await error(
+                'Not Authorizing', 'No authorization is in progress.', 404)
+        auth = await db.auth.get_authing_by_code(session.authing) # Step 40, 41
+        if auth is None:
+            return await error(
+                'Not Authorizing', 'No authorization is in progress.', 404)
+        return auth
+
+    async def showcode(self, request: web.Request):
+        """Show the auth code to copy into an app that has no server."""
+        try:
+            code = request.query['code']
+        except KeyError:
+            return await error('Authorization Failed', 'Missing authorization code.')
+        with open('templates/code.html', 'r') as f:
+            data = f.read()
+        data = data.replace('__code__', escape(code))
+        return web.Response(text=data, content_type='text/html')
 
 @web.middleware
 async def check_login(request: web.Request, handler):
@@ -77,4 +120,5 @@ routes = [
     web.get('/authorize', auth.page),
     web.post('/authorize', auth.confirm),
     web.delete('/authorize', auth.cancel),
+    web.get('/showcode', auth.showcode)
 ]
