@@ -23,6 +23,15 @@ COMMENTS_REGEX = re.compile(
     r"""<div class="actions-wrap">.*?<div class="name">\s+"""
     r"""<a href="/users/([_a-zA-Z0-9-]+)">\1</a>\s+</div>\s+"""
     r"""<div class="content">\s*(.*?)\s*</div>""", re.S)
+INVALID_AUTH_TITLE = 'Invalid Auth URL'
+INVALID_AUTH_TEXT = '''You have been given a faulty authorization URL.
+<br/>Please contact whoever gave you this URL and inform them of this.'''
+SCOPES_SPLIT_REGEX = re.compile(r'(?<=[a-z])(?=[, +])(?:\+|,? ?)(?=[a-z])')
+SCOPES_DESC = {
+    'identify': {
+        'en': 'Know who you are on Scratch'
+    }
+}
 
 globals().update(config.get('consts', {}))
 
