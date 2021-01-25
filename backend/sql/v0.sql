@@ -89,6 +89,10 @@ CREATE TABLE IF NOT EXISTS authings (
   expiry integer,
   -- FK
   FOREIGN KEY(client_id) REFERENCES applications(client_id)
+  -- this is an alternate index
+  UNIQUE(client_id, state)
 );
+CREATE INDEX IF NOT EXISTS authing_creators
+ON authings(client_id, state) WHERE state IS NOT NULL;
 
 PRAGMA user_version = 1;

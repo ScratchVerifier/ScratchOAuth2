@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Authorize Application</title>
+	<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+	<style>
+		#authBox {
+			width: calc(100vw - 10px);
+			max-width: 700px;
+			display: absolute;
+			margin: auto;
+			left: 0;
+			right: 0;
+		}
+		body {
+			margin: 5px;
+		}
+		.center {
+            text-align: center;
+        }
+		ul {
+			padding-left: revert;
+			margin-bottom: revert;
+		}
+		.unmoderated {
+			background-color: #202225;
+			border-radius: 3px;
+			border: 1.5px solid gray;
+		}
+		.unmoderated.shown {
+			background-color: rgba(0, 0, 0, .1);
+		}
+		.unmoderated span:last-child, .unmoderated.shown span:first-child {
+			display: none;
+		}
+		.unmoderated.shown span:last-child, .unmoderated span:first-child {
+			display: inline;
+		}
+		.unmoderated span:first-child {
+			color: #dcddde;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+	<div class="Box box-shadow" id="authBox">
+		<div class="Box-row">
+			<h2 class="m-0 center">Authorizing __appname__</h2>
+		</div>
+		<div class="Box-row">
+			<p>Authorize __appname__? It will be able to:</p>
+			<ul>
+				__scopes__
+			</ul>
+			<div><form method="POST">
+				<input type="submit" class="btn btn-primary" name="action" value="Confirm" />
+				<input type="submit" class="btn btn-cancel" name="action" value="Cancel" />
+			</form></div>
+		</div>
+	</div>
+	<script>
+		$('.unmoderated').click((e) => {
+			$('.unmoderated').toggleClass('shown');
+		}).attr('title', 'App name has not been moderated yet. Click to reveal.')
+		$('<span>[unmoderated app name]</span>').insertBefore('.unmoderated span')
+	</script>
+</body>
+</html>
