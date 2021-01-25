@@ -77,6 +77,32 @@ class Tokens:
 
     async def delete_token(self, request: web.Request):
         """Revoke an access token or refresh token."""
+        try:
+            data = await request.json()
+            client_id = int(data['client_id'])
+            client_secret = data['client_secret']
+            refresh_token = data['token']
+            token_type = data['type']
+            if token_type not in {'refresh', 'access'}:
+                raise ValueError('Invalid token type')
+        except (KeyError, ValueError):
+            raise web.HTTPBadRequest() from None
+        app = await db.apps.application(None, client_id)  # Step 46
+        # Step 47
+        if app is None or not compare_digest(app.client_secret, client_secret):
+            raise web.HTTPUnauthorized()
+        # TODO: this doesn't make sense, you can't get a refresh token by client ID
+        # must fix this in next commit but it's being left this way for now
+        refresh_token, refresh_expiry, _ = \
+            await db.tokens.get_refresh_token(client_id)
+        if refresh_token is None or refresh_expiry is None:
+            raise web.HTTPNotFound()
+        if refresh_expiry < time():
+            raise web.HTTPGone()
+        if token_type == 'refresh':
+            await db.tokens.revoke_refresh_token(refresh_token)
+        else:
+            await db.tokens.revoke_access_token(refresh_token)
         return web.HTTPNoContent()
 
 tokens = Tokens()

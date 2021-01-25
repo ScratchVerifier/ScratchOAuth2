@@ -297,6 +297,29 @@ class Tokens(Database):
             await self.db.execute(query3, (old,))
         return (access_token, expiry)
 
+    async def revoke_token(self, refresh_token: str, query: str):
+        query1 = "SELECT access_token FROM approvals WHERE refresh_token=?"
+        async with lock:
+            await self.db.execute(query1, (refresh_token,))
+            row = await self.db.fetchone()
+        if row is None:
+            return # looks like it's already revoked
+        code: str = row[0]
+        query2 = query
+        await self.db.execute(query2, (refresh_token,))
+        query3 = "DELETE FROM authings WHERE code=?"
+        await self.db.execute(query3, (code,))
+
+    async def revoke_refresh_token(self, refresh_token: str):
+        """Revoke a refresh token."""
+        query = "DELETE FROM approvals WHERE refresh_token=?"
+        await self.revoke_token(refresh_token, query)
+
+    async def revoke_access_token(self, refresh_token: str):
+        """Revoke an access token."""
+        query = "UPDATE approvals SET access_token=NULL WHERE refresh_token=?"
+        await self.revoke_token(refresh_token, query)
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
