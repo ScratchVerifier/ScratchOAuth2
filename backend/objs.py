@@ -33,3 +33,11 @@ class Authing(NamedTuple):
     scopes: List[str]
     state: Optional[str]
     expiry: Optional[int]
+
+class TokensResponse(NamedTuple):
+    """A bundle of tokens data."""
+    access_token: str
+    access_expiry: int
+    refresh_token: str
+    refresh_expiry: int
+    scopes: str

@@ -1,7 +1,9 @@
+from time import time
 from hmac import compare_digest
 from aiohttp import web
 import db
 from config import SCOPES_DESC, SCOPES_SPLIT_REGEX
+from objs import TokensResponse
 
 class Tokens:
     """Token management."""
@@ -35,17 +37,43 @@ class Tokens:
             code, client_id, access_token, auth.scopes)
         scopes = ' '.join(auth.scopes)
         # Step 56
-        return web.json_response({
-            'access_token': access_token,
-            'access_expiry': access_expiry,
-            'refresh_token': refresh_token,
-            'refresh_expiry': refresh_expiry,
-            'scopes': scopes
-        })
+        return web.json_response(TokensResponse(
+            access_token, access_expiry, refresh_token,
+            refresh_expiry, scopes)._asdict())
 
     async def access_token(self, request: web.Request):
         """Request an access token using a refresh token."""
-        return web.Response(text='')
+        # Step 57
+        try:
+            data = await request.json()
+            client_id = int(data['client_id'])
+            client_secret = data['client_secret']
+            refresh_token = data['refresh_token']
+        except (KeyError, ValueError):
+            raise web.HTTPBadRequest() from None
+        app = await db.apps.application(None, client_id) # Step 58
+        # Step 59
+        if app is None or not compare_digest(app.client_secret, client_secret):
+            raise web.HTTPUnauthorized()
+        # Step 60
+        old, _, _ = await db.tokens.get_access_token(client_id, refresh_token)
+        refresh_token, refresh_expiry, scopes = \
+            await db.tokens.get_refresh_token(client_id)
+        if (
+            old is None
+            or refresh_token is None
+            or refresh_expiry is None
+            or scopes is None
+        ):
+            raise web.HTTPNotFound()
+        if refresh_expiry < time(): # expired
+            raise web.HTTPGone()
+        access_token, access_expiry = \
+            await db.tokens.refresh_access_token(old, refresh_token)
+        # Step 64
+        return web.json_response(TokensResponse(
+            access_token, access_expiry, refresh_token,
+            refresh_expiry, scopes)._asdict())
 
     async def delete_token(self, request: web.Request):
         """Revoke an access token or refresh token."""
