@@ -57,8 +57,8 @@ class Tokens:
             raise web.HTTPUnauthorized()
         # Step 60
         old, _, _ = await db.tokens.get_access_token(client_id, refresh_token)
-        refresh_token, refresh_expiry, scopes = \
-            await db.tokens.get_refresh_token(client_id)
+        refresh_expiry, scopes = \
+            await db.tokens.get_refresh_token(client_id, refresh_token)
         if (
             old is None
             or refresh_token is None
@@ -93,8 +93,8 @@ class Tokens:
             raise web.HTTPUnauthorized()
         # TODO: this doesn't make sense, you can't get a refresh token by client ID
         # must fix this in next commit but it's being left this way for now
-        refresh_token, refresh_expiry, _ = \
-            await db.tokens.get_refresh_token(client_id)
+        refresh_expiry, _ = \
+            await db.tokens.get_refresh_token(client_id, refresh_token)
         if refresh_token is None or refresh_expiry is None:
             raise web.HTTPNotFound()
         if refresh_expiry < time():

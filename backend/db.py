@@ -270,15 +270,15 @@ class Tokens(Database):
             return (None, None, None)
         return (access_token, row['expiry'], row['scopes'])
 
-    async def get_refresh_token(self, client_id: int) \
-        -> Union[Tuple[str, int, str], Tuple[None, None, None]]:
-        query = "SELECT refresh_token, expiry, scopes FROM approvals " \
-            "WHERE client_id=?"
+    async def get_refresh_token(self, client_id: int, refresh_token: str) \
+        -> Union[Tuple[int, str], Tuple[None, None]]:
+        query = "SELECT expiry, scopes FROM approvals " \
+            "WHERE client_id=? AND refresh_token=?"
         async with lock:
-            await self.db.execute(query, (client_id,))
+            await self.db.execute(query, (client_id, refresh_token,))
             row = await self.db.fetchone()
         if row is None:
-            return (None, None, None)
+            return (None, None)
         return tuple(row)
 
     async def refresh_access_token(self, old: str, refresh_token: str):
