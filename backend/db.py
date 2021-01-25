@@ -3,7 +3,7 @@ from secrets import randbits, token_hex
 from typing import Optional, Tuple, List
 import asyncio
 import aiosqlite as sql
-from config import LONG_EXPIRY, config, SHORT_EXPIRY, timestamp
+from config import LONG_EXPIRY, MEDIUM_EXPIRY, SHORT_EXPIRY, config, timestamp
 import objs
 
 __all__ = ['session', 'startup', 'teardown']
@@ -214,6 +214,44 @@ class Authorization(Database):
         query2 = "DELETE FROM authings WHERE code=?"
         await self.db.execute(query2, (code,))
 
+class Tokens(Database):
+    """Manage refresh and access tokens."""
+
+    async def new_access_token(self, code: str):
+        """Generate and set an access token."""
+        # almost like it was made for this
+        access_token = token_hex(64) # Step 49
+        expiry = int(time()) + MEDIUM_EXPIRY
+        query = 'UPDATE authings SET code=?, expiry=?, state=NULL WHERE code=?'
+        await self.db.execute(query, (access_token, expiry, code)) # Step 50, 51
+        return (access_token, expiry)
+
+    async def new_refresh_token(self, code: str, client_id: int,
+                                access_token: str, scopes: List[str]):
+        """Generate and set a refresh token."""
+        # Step 52
+        refresh_token = token_hex(64)
+        expiry = int(time()) + LONG_EXPIRY
+        # Step 53
+        query1 = "SELECT user_id FROM sessions WHERE authing=?"
+        async with lock:
+            await self.db.execute(query1, (code,))
+            row = await self.db.fetchone()
+        if row is None or row[0] is None:
+            raise ValueError('No authing')
+        user_id = row[0]
+        query2 = "DELETE FROM approvals WHERE user_id=? AND client_id=?"
+        await self.db.execute(query2, (user_id, client_id))
+        # Step 54
+        query3 = "INSERT INTO approvals (refresh_token, user_id, client_id, " \
+            "access_token, scopes, expiry) VALUES (?, ?, ?, ?, ?, ?)"
+        await self.db.execute(query3, (refresh_token, user_id, client_id,
+                                       access_token, ' '.join(scopes), expiry))
+        # Step 55
+        query4 = "UPDATE sessions SET authing=NULL WHERE authing=?"
+        await self.db.execute(query4, (code,))
+        return (refresh_token, expiry)
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
@@ -245,6 +283,7 @@ session = Session(cursor)
 login = Login(cursor)
 apps = Applications(cursor)
 auth = Authorization(cursor)
+tokens = Tokens(cursor)
 
 async def teardown(app):
     """Shut down the database."""
