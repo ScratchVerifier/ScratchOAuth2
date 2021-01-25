@@ -9,7 +9,7 @@ with open('soa2.json') as _cfile:
 
 # defaults
 SHORT_EXPIRY = 600
-LONG_EXPIRY = 3600*24*265
+LONG_EXPIRY = 3600*24*365
 
 # usually not modified, but defining it here allows
 # configuration to workaround modifying source
