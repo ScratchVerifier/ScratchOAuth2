@@ -40,6 +40,7 @@ class TokensResponse(NamedTuple):
     access_expiry: int
     refresh_token: str
     refresh_expiry: int
+    scopes: List[str]
 
 class Approval(NamedTuple):
     """An approval for an application."""
