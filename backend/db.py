@@ -323,7 +323,7 @@ class Tokens(Database):
 class Approvals(Database):
     """Manage existing app approvals."""
 
-    async def get(self, user_id: int):
+    async def get(self, user_id: Optional[int]):
         """Get all approvals by this user."""
         query = (
             "SELECT refresh_token, approvals.client_id AS client_id, app_name"
@@ -335,7 +335,7 @@ class Approvals(Database):
             rows = await self.db.fetchall()
         return [objs.Approval(**row) for row in rows]
 
-    async def delete(self, refresh_token: str, user_id: int):
+    async def delete(self, refresh_token: str, user_id: Optional[int]):
         """Revoke an approval by this user.
         Returns whether deletion was successful.
         """

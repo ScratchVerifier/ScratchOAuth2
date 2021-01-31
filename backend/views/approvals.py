@@ -7,11 +7,18 @@ class Approvals:
 
     async def approvals(self, request: web.Request):
         """Get all approvals by this user."""
-        return web.Response(text='')
+        session: objs.Session = request['session']
+        return web.json_response([
+            thing._asdict()
+            for thing in await db.approvals.get(session.user_id)])
 
     async def revoke(self, request: web.Request):
         """Revoke an approval."""
-        return web.HTTPNoContent()
+        session: objs.Session = request['session']
+        if await db.approvals.delete(
+                request.match_info['refresh_token'], session.user_id):
+            return web.HTTPNoContent()
+        raise web.HTTPNotFound()
 
 @web.middleware
 async def check_login(request: web.Request, handler):
