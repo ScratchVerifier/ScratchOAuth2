@@ -177,6 +177,7 @@ class Authorization(Database):
 
     async def get_authing(self, query: str, params: Tuple):
         """Fetch data for an ongoing approval process."""
+        await self.expire()
         async with lock:
             await self.db.execute(query, params)
             row = await self.db.fetchone()
@@ -199,6 +200,7 @@ class Authorization(Database):
     async def start_auth(self, session_id: int, state: str, client_id: int,
                          redirect_uri: str, scopes: List[str]):
         """Begin the app approval process."""
+        await self.expire()
         auth = await self.get_authing_by_creator(client_id, state)
         if auth is not None:
             return
@@ -221,6 +223,16 @@ class Authorization(Database):
         await self.db.execute(query1, (session_id,))
         query2 = "DELETE FROM authings WHERE code=?"
         await self.db.execute(query2, (code,))
+        await self.expire()
+
+    async def expire(self):
+        """Revoke authings that have expired."""
+        now = int(time())
+        query1 = "(SELECT code FROM authings WHERE expiry<?)"
+        query2 = f"UPDATE sessions SET authing=NULL WHERE authing IN {query1}"
+        await self.db.execute(query2, (now,))
+        query3 = "DELETE FROM authings WHERE expiry<?"
+        await self.db.execute(query3, (now,))
 
 class Tokens(Database):
     """Manage refresh and access tokens."""
@@ -333,6 +345,7 @@ class Approvals(Database):
 
     async def get(self, user_id: Optional[int]):
         """Get all approvals by this user."""
+        await self.expire()
         query = (
             "SELECT refresh_token, approvals.client_id AS client_id, app_name"
             "app_name, scopes, expiry, approved FROM approvals JOIN applications "
@@ -347,6 +360,7 @@ class Approvals(Database):
         """Revoke an approval by this user.
         Returns whether deletion was successful.
         """
+        await self.expire()
         query1 = "SELECT access_token FROM approvals "\
             "WHERE refresh_token=? AND user_id=?"
         async with lock:
@@ -360,6 +374,20 @@ class Approvals(Database):
         query3 = "DELETE FROM authings WHERE code=?"
         await self.db.execute(query3, (code,))
         return True
+
+    async def expire(self):
+        """Expire approvals."""
+        now = int(time())
+        query1 = "SELECT access_token FROM approvals WHERE expiry<?"
+        async with lock:
+            await self.db.execute(query1, (now,))
+            rows = await self.db.fetchall()
+        if not rows: # nothing expiring
+            return # so skip more queries
+        query2 = "DELETE FROM approvals WHERE expiry<?"
+        await self.db.execute(query2, (now,))
+        query3 = "DELETE FROM authings WHERE code=?"
+        await self.db.executemany(query3, ((row[0],) for row in rows))
 
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
