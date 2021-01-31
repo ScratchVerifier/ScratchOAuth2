@@ -21,7 +21,7 @@ class User:
             user.user_name
         )) as resp:
             if resp.status == 200:
-                data =  await resp.json()
+                data = await resp.json()
             else:
                 data = None
         if data is None:
