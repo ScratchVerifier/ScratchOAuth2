@@ -1,6 +1,6 @@
 from time import time
 from secrets import randbits, token_hex
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, overload
 import asyncio
 import aiosqlite as sql
 from config import LONG_EXPIRY, MEDIUM_EXPIRY, SHORT_EXPIRY, config, timestamp
@@ -59,14 +59,6 @@ class Login(Database):
         await self.db.execute(query, (nonce, session_id))
         # Step 20
         return nonce
-
-    async def save_user(self, user_id: int, user_name: str):
-        """Set or update user information."""
-        query1 = "DELETE FROM scratch_users WHERE user_id=?"
-        query2 = "INSERT INTO scratch_users (user_name, user_id) VALUES (?, ?)"
-        async with lock:
-            await self.db.execute(query1, (user_id,))
-            await self.db.execute(query2, (user_name, user_id))
 
     async def login_session(self, session_id: int, user_id: int):
         """Mark a session as logged in."""
@@ -343,18 +335,30 @@ class Tokens(Database):
 class Approvals(Database):
     """Manage existing app approvals."""
 
-    async def get(self, user_id: Optional[int]):
-        """Get all approvals by this user."""
+    async def get(self, query: str = '', params: Tuple = (), method=None):
+        """Get approval(s)."""
         await self.expire()
         query = (
             "SELECT refresh_token, approvals.client_id AS client_id, app_name"
             "app_name, scopes, expiry, approved FROM approvals JOIN applications "
-            "WHERE approvals.client_id=applications.client_id AND user_id=?"
+            "WHERE approvals.client_id=applications.client_id" + query
         )
         async with lock:
-            await self.db.execute(query, (user_id,))
-            rows = await self.db.fetchall()
+            await self.db.execute(query, params)
+            return await (method or self.db.fetchone)()
+
+    async def get_by_id(self, user_id: Optional[int]):
+        """Get all approvals by this user."""
+        query = " AND user_id=?"
+        rows = await self.get(query, (user_id,), self.db.fetchall)
         return [objs.Approval(**row) for row in rows]
+
+    async def get_by_access_token(self, access_token: str):
+        """Get an approval by its access token."""
+        await self.expire()
+        query = " AND access_token=?"
+        row = await self.get(query, (access_token,), self.db.fetchone)
+        return objs.Approval(**row) if row is not None else None
 
     async def delete(self, refresh_token: str, user_id: Optional[int]):
         """Revoke an approval by this user.
@@ -389,6 +393,57 @@ class Approvals(Database):
         query3 = "DELETE FROM authings WHERE code=?"
         await self.db.executemany(query3, ((row[0],) for row in rows))
 
+class User(Database):
+    """Scratch user tracking."""
+
+    @overload
+    async def get(self, username: str) -> objs.User: ...
+
+    @overload
+    async def get(self, user_id: int) -> objs.User: ...
+
+    async def get(self, user_key):
+        """Get user info."""
+        query = "SELECT * FROM scratch_users WHERE "
+        if isinstance(user_key, str):
+            query += "user_name=?"
+        elif isinstance(user_key, int):
+            query += "user_id=?"
+        else:
+            query += "0=1"
+        async with lock:
+            await self.db.execute(query, (user_key,))
+            row = await self.db.fetchone()
+        if row is None:
+            return None
+        return objs.User(**row)
+
+    async def get_by_access_token(self, access_token: str):
+        """Get a user by an access token to their name."""
+        query = "SELECT user_id FROM approvals WHERE access_token=?"
+        async with lock:
+            await self.db.execute(query, (access_token,))
+            row = await self.db.fetchone()
+        if row is None or row[0] is None:
+            return None
+        return await self.get(row[0])
+
+    async def set(self, user_id: int, user_name: str):
+        """Set or update user information."""
+        query1 = "SELECT data FROM scratch_users WHERE user_id=? OR user_name=?"
+        query2 = "DELETE FROM scratch_users WHERE user_id=? OR user_name=?"
+        query3 = "INSERT INTO scratch_users (user_id, user_name, data) " \
+            "VALUES (?, ?, ?)"
+        async with lock:
+            await self.db.execute(query1, (user_id, user_name))
+            row = self.db.fetchone()
+            if row is None:
+                data = None
+            else:
+                data = row[0]
+            await self.db.execute(query2, (user_id, user_name))
+            await self.db.execute(query3, (user_id, user_name, data))
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
@@ -422,6 +477,7 @@ apps = Applications(cursor)
 auth = Authorization(cursor)
 tokens = Tokens(cursor)
 approvals = Approvals(cursor)
+user = User(cursor)
 
 async def teardown(app):
     """Shut down the database."""

@@ -10,7 +10,7 @@ class Approvals:
         session: objs.Session = request['session']
         return web.json_response([
             thing._asdict()
-            for thing in await db.approvals.get(session.user_id)])
+            for thing in await db.approvals.get_by_id(session.user_id)])
 
     async def revoke(self, request: web.Request):
         """Revoke an approval."""
