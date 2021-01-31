@@ -23,6 +23,7 @@ class Session(Database):
 
     async def get(self, session_id: int) -> Optional[objs.Session]:
         """Get a Session object by ID."""
+        await self.expire()
         query = "SELECT * FROM sessions WHERE session_id=?"
         async with lock:
             await self.db.execute(query, (session_id,))
@@ -33,6 +34,7 @@ class Session(Database):
 
     async def create(self) -> int:
         """Create a new session and return its ID."""
+        await self.expire()
         # Step 9
         session_id = randbits(62)
         expiry = int(time()) + SHORT_EXPIRY
@@ -40,6 +42,11 @@ class Session(Database):
         query = "INSERT INTO sessions (session_id, expiry) VALUES (?, ?)"
         await self.db.execute(query, (session_id, expiry))
         return session_id
+
+    async def expire(self):
+        """Remove expired sessions."""
+        query = "DELETE FROM sessions WHERE expiry<?"
+        await self.db.execute(query, (int(time()),))
 
 class Login(Database):
     """Handle login database interactions."""
@@ -63,14 +70,15 @@ class Login(Database):
 
     async def login_session(self, session_id: int, user_id: int):
         """Mark a session as logged in."""
-        expiry: int = LONG_EXPIRY
+        expiry = int(time()) + LONG_EXPIRY
         # Step 30-32
         query = "UPDATE sessions SET user_id=?, expiry=?, nonce=NULL " \
             "WHERE session_id=?"
         await self.db.execute(query, (user_id, expiry, session_id))
 
     async def logout(self, session_id: int):
-        expiry: int = SHORT_EXPIRY
+        """Unmark a session as logged in."""
+        expiry = int(time()) + SHORT_EXPIRY
         query = "UPDATE sessions SET user_id=NULL, expiry=?, " \
             "nonce=NULL WHERE session_id=?"
         await self.db.execute(query, (expiry, session_id))
