@@ -35,7 +35,7 @@ class Tokens:
         access_token, access_expiry = await db.tokens.new_access_token(code)
         refresh_token, refresh_expiry = await db.tokens.new_refresh_token(
             code, client_id, access_token, auth.scopes)
-        scopes = ' '.join(auth.scopes)
+        scopes = auth.scopes
         # Step 56
         return web.json_response(TokensResponse(
             access_token, access_expiry, refresh_token,
@@ -70,6 +70,7 @@ class Tokens:
             raise web.HTTPGone()
         access_token, access_expiry = \
             await db.tokens.refresh_access_token(old, refresh_token)
+        scopes = scopes.split()
         # Step 64
         return web.json_response(TokensResponse(
             access_token, access_expiry, refresh_token,

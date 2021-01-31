@@ -1,3 +1,4 @@
+from time import time
 import json
 import traceback
 from aiohttp import web
@@ -98,4 +99,6 @@ middlewares = [
     errors,
     views.applications.check_login,
     views.authorization.check_login,
+    views.approvals.check_login,
+    views.user.check_token,
 ]

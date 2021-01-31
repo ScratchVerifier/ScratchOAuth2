@@ -1,6 +1,6 @@
 from time import time
 from secrets import randbits, token_hex
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Tuple, List, Union, overload
 import asyncio
 import aiosqlite as sql
 from config import LONG_EXPIRY, MEDIUM_EXPIRY, SHORT_EXPIRY, config, timestamp
@@ -23,6 +23,7 @@ class Session(Database):
 
     async def get(self, session_id: int) -> Optional[objs.Session]:
         """Get a Session object by ID."""
+        await self.expire()
         query = "SELECT * FROM sessions WHERE session_id=?"
         async with lock:
             await self.db.execute(query, (session_id,))
@@ -33,6 +34,7 @@ class Session(Database):
 
     async def create(self) -> int:
         """Create a new session and return its ID."""
+        await self.expire()
         # Step 9
         session_id = randbits(62)
         expiry = int(time()) + SHORT_EXPIRY
@@ -40,6 +42,11 @@ class Session(Database):
         query = "INSERT INTO sessions (session_id, expiry) VALUES (?, ?)"
         await self.db.execute(query, (session_id, expiry))
         return session_id
+
+    async def expire(self):
+        """Remove expired sessions."""
+        query = "DELETE FROM sessions WHERE expiry<?"
+        await self.db.execute(query, (int(time()),))
 
 class Login(Database):
     """Handle login database interactions."""
@@ -53,24 +60,17 @@ class Login(Database):
         # Step 20
         return nonce
 
-    async def save_user(self, user_id: int, user_name: str):
-        """Set or update user information."""
-        query1 = "DELETE FROM scratch_users WHERE user_id=?"
-        query2 = "INSERT INTO scratch_users (user_name, user_id) VALUES (?, ?)"
-        async with lock:
-            await self.db.execute(query1, (user_id,))
-            await self.db.execute(query2, (user_name, user_id))
-
     async def login_session(self, session_id: int, user_id: int):
         """Mark a session as logged in."""
-        expiry: int = LONG_EXPIRY
+        expiry = int(time()) + LONG_EXPIRY
         # Step 30-32
         query = "UPDATE sessions SET user_id=?, expiry=?, nonce=NULL " \
             "WHERE session_id=?"
         await self.db.execute(query, (user_id, expiry, session_id))
 
     async def logout(self, session_id: int):
-        expiry: int = SHORT_EXPIRY
+        """Unmark a session as logged in."""
+        expiry = int(time()) + SHORT_EXPIRY
         query = "UPDATE sessions SET user_id=NULL, expiry=?, " \
             "nonce=NULL WHERE session_id=?"
         await self.db.execute(query, (expiry, session_id))
@@ -169,6 +169,7 @@ class Authorization(Database):
 
     async def get_authing(self, query: str, params: Tuple):
         """Fetch data for an ongoing approval process."""
+        await self.expire()
         async with lock:
             await self.db.execute(query, params)
             row = await self.db.fetchone()
@@ -191,6 +192,7 @@ class Authorization(Database):
     async def start_auth(self, session_id: int, state: str, client_id: int,
                          redirect_uri: str, scopes: List[str]):
         """Begin the app approval process."""
+        await self.expire()
         auth = await self.get_authing_by_creator(client_id, state)
         if auth is not None:
             return
@@ -213,6 +215,16 @@ class Authorization(Database):
         await self.db.execute(query1, (session_id,))
         query2 = "DELETE FROM authings WHERE code=?"
         await self.db.execute(query2, (code,))
+        await self.expire()
+
+    async def expire(self):
+        """Revoke authings that have expired."""
+        now = int(time())
+        query1 = "(SELECT code FROM authings WHERE expiry<?)"
+        query2 = f"UPDATE sessions SET authing=NULL WHERE authing IN {query1}"
+        await self.db.execute(query2, (now,))
+        query3 = "DELETE FROM authings WHERE expiry<?"
+        await self.db.execute(query3, (now,))
 
 class Tokens(Database):
     """Manage refresh and access tokens."""
@@ -320,6 +332,118 @@ class Tokens(Database):
         query = "UPDATE approvals SET access_token=NULL WHERE refresh_token=?"
         await self.revoke_token(refresh_token, query)
 
+class Approvals(Database):
+    """Manage existing app approvals."""
+
+    async def get(self, query: str = '', params: Tuple = (), method=None):
+        """Get approval(s)."""
+        await self.expire()
+        query = (
+            "SELECT refresh_token, approvals.client_id AS client_id, app_name"
+            "app_name, scopes, expiry, approved FROM approvals JOIN applications "
+            "WHERE approvals.client_id=applications.client_id" + query
+        )
+        async with lock:
+            await self.db.execute(query, params)
+            return await (method or self.db.fetchone)()
+
+    async def get_by_id(self, user_id: Optional[int]):
+        """Get all approvals by this user."""
+        query = " AND user_id=?"
+        rows = await self.get(query, (user_id,), self.db.fetchall)
+        return [objs.Approval(**row) for row in rows]
+
+    async def get_by_access_token(self, access_token: str):
+        """Get an approval by its access token."""
+        await self.expire()
+        query = " AND access_token=?"
+        row = await self.get(query, (access_token,), self.db.fetchone)
+        return objs.Approval(**row) if row is not None else None
+
+    async def delete(self, refresh_token: str, user_id: Optional[int]):
+        """Revoke an approval by this user.
+        Returns whether deletion was successful.
+        """
+        await self.expire()
+        query1 = "SELECT access_token FROM approvals "\
+            "WHERE refresh_token=? AND user_id=?"
+        async with lock:
+            await self.db.execute(query1, (refresh_token, user_id))
+            row = await self.db.fetchone()
+        if row is None:
+            return False
+        code = row[0]
+        query2 = "DELETE FROM approvals WHERE refresh_token=? AND user_id=?"
+        await self.db.execute(query2, (refresh_token, user_id))
+        query3 = "DELETE FROM authings WHERE code=?"
+        await self.db.execute(query3, (code,))
+        return True
+
+    async def expire(self):
+        """Expire approvals."""
+        now = int(time())
+        query1 = "SELECT access_token FROM approvals WHERE expiry<?"
+        async with lock:
+            await self.db.execute(query1, (now,))
+            rows = await self.db.fetchall()
+        if not rows: # nothing expiring
+            return # so skip more queries
+        query2 = "DELETE FROM approvals WHERE expiry<?"
+        await self.db.execute(query2, (now,))
+        query3 = "DELETE FROM authings WHERE code=?"
+        await self.db.executemany(query3, ((row[0],) for row in rows))
+
+class User(Database):
+    """Scratch user tracking."""
+
+    @overload
+    async def get(self, username: str) -> objs.User: ...
+
+    @overload
+    async def get(self, user_id: int) -> objs.User: ...
+
+    async def get(self, user_key):
+        """Get user info."""
+        query = "SELECT * FROM scratch_users WHERE "
+        if isinstance(user_key, str):
+            query += "user_name=?"
+        elif isinstance(user_key, int):
+            query += "user_id=?"
+        else:
+            query += "0=1"
+        async with lock:
+            await self.db.execute(query, (user_key,))
+            row = await self.db.fetchone()
+        if row is None:
+            return None
+        return objs.User(**row)
+
+    async def get_by_access_token(self, access_token: str):
+        """Get a user by an access token to their name."""
+        query = "SELECT user_id FROM approvals WHERE access_token=?"
+        async with lock:
+            await self.db.execute(query, (access_token,))
+            row = await self.db.fetchone()
+        if row is None or row[0] is None:
+            return None
+        return await self.get(row[0])
+
+    async def set(self, user_id: int, user_name: str):
+        """Set or update user information."""
+        query1 = "SELECT data FROM scratch_users WHERE user_id=? OR user_name=?"
+        query2 = "DELETE FROM scratch_users WHERE user_id=? OR user_name=?"
+        query3 = "INSERT INTO scratch_users (user_id, user_name, data) " \
+            "VALUES (?, ?, ?)"
+        async with lock:
+            await self.db.execute(query1, (user_id, user_name))
+            row = self.db.fetchone()
+            if row is None:
+                data = None
+            else:
+                data = row[0]
+            await self.db.execute(query2, (user_id, user_name))
+            await self.db.execute(query3, (user_id, user_name, data))
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
@@ -352,6 +476,8 @@ login = Login(cursor)
 apps = Applications(cursor)
 auth = Authorization(cursor)
 tokens = Tokens(cursor)
+approvals = Approvals(cursor)
+user = User(cursor)
 
 async def teardown(app):
     """Shut down the database."""
