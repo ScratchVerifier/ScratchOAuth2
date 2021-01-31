@@ -98,4 +98,5 @@ middlewares = [
     errors,
     views.applications.check_login,
     views.authorization.check_login,
+    views.approvals.check_login,
 ]
