@@ -320,6 +320,39 @@ class Tokens(Database):
         query = "UPDATE approvals SET access_token=NULL WHERE refresh_token=?"
         await self.revoke_token(refresh_token, query)
 
+class Approvals(Database):
+    """Manage existing app approvals."""
+
+    async def get(self, user_id: int):
+        """Get all approvals by this user."""
+        query = (
+            "SELECT refresh_token, approvals.client_id AS client_id, app_name"
+            "app_name, scopes, expiry, approved FROM approvals JOIN applications "
+            "WHERE approvals.client_id=applications.client_id AND user_id=?"
+        )
+        async with lock:
+            await self.db.execute(query, (user_id,))
+            rows = await self.db.fetchall()
+        return [objs.Approval(**row) for row in rows]
+
+    async def delete(self, refresh_token: str, user_id: int):
+        """Revoke an approval by this user.
+        Returns whether deletion was successful.
+        """
+        query1 = "SELECT access_token FROM approvals "\
+            "WHERE refresh_token=? AND user_id=?"
+        async with lock:
+            await self.db.execute(query1, (refresh_token, user_id))
+            row = await self.db.fetchone()
+        if row is None:
+            return False
+        code = row[0]
+        query2 = "DELETE FROM approvals WHERE refresh_token=? AND user_id=?"
+        await self.db.execute(query2, (refresh_token, user_id))
+        query3 = "DELETE FROM authings WHERE code=?"
+        await self.db.execute(query3, (code,))
+        return True
+
 async def upgrade(db: sql.Cursor):
     """Detect database version and upgrade to newest if necessary."""
     LATEST_DBV = 1
@@ -352,6 +385,7 @@ login = Login(cursor)
 apps = Applications(cursor)
 auth = Authorization(cursor)
 tokens = Tokens(cursor)
+approvals = Approvals(cursor)
 
 async def teardown(app):
     """Shut down the database."""

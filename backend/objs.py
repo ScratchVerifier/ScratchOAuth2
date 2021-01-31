@@ -40,4 +40,12 @@ class TokensResponse(NamedTuple):
     access_expiry: int
     refresh_token: str
     refresh_expiry: int
-    scopes: str
+
+class Approval(NamedTuple):
+    """An approval for an application."""
+    refresh_token: str
+    client_id: int
+    app_name: str
+    scopes: List[str]
+    expiry: int
+    approved: bool # whether name is approved, not the app
