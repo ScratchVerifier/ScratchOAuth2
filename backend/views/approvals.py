@@ -10,7 +10,7 @@ class Approvals:
         session: objs.Session = request['session']
         return web.json_response([
             thing._asdict()
-            for thing in await db.approvals.get(session.user_id)])
+            for thing in await db.approvals.get_by_id(session.user_id)])
 
     async def revoke(self, request: web.Request):
         """Revoke an approval."""
@@ -22,7 +22,7 @@ class Approvals:
 
 @web.middleware
 async def check_login(request: web.Request, handler):
-    """Ensure `/applications` requests are logged in."""
+    """Ensure `/approvals` requests are logged in."""
     session: objs.Session = request['session']
     if request.path.startswith('/approvals') and session.user_id is None:
         raise web.HTTPUnauthorized()

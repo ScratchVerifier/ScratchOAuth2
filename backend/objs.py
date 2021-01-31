@@ -50,3 +50,8 @@ class Approval(NamedTuple):
     scopes: List[str]
     expiry: int
     approved: bool # whether name is approved, not the app
+
+class User(NamedTuple):
+    user_id: int
+    user_name: str
+    data: Optional[str]
