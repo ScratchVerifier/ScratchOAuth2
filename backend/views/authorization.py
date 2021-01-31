@@ -48,7 +48,7 @@ class Authorization:
         elif not app.approved:
             name = f'[unmoderated app name]'
         else:
-            name = app.app_name
+            name = escape(app.app_name)
         data = (data.replace('__appname__', name)
                 .replace('__scopes__', '\n'.join(
                     '<li>%s</li>' % SCOPES_DESC[scope]['en']
