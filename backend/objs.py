@@ -33,3 +33,25 @@ class Authing(NamedTuple):
     scopes: List[str]
     state: Optional[str]
     expiry: Optional[int]
+
+class TokensResponse(NamedTuple):
+    """A bundle of tokens data."""
+    access_token: str
+    access_expiry: int
+    refresh_token: str
+    refresh_expiry: int
+    scopes: List[str]
+
+class Approval(NamedTuple):
+    """An approval for an application."""
+    refresh_token: str
+    client_id: int
+    app_name: str
+    scopes: List[str]
+    expiry: int
+    approved: bool # whether name is approved, not the app
+
+class User(NamedTuple):
+    user_id: int
+    user_name: str
+    data: Optional[str]

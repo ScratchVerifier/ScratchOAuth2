@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS scratch_users (
   -- arbitrary data in case we need it
   data text
 );
+CREATE INDEX IF NOT EXISTS usernames ON scratch_users(user_name);
 
 CREATE TABLE IF NOT EXISTS applications (
   -- client ID
