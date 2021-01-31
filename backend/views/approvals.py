@@ -22,7 +22,7 @@ class Approvals:
 
 @web.middleware
 async def check_login(request: web.Request, handler):
-    """Ensure `/applications` requests are logged in."""
+    """Ensure `/approvals` requests are logged in."""
     session: objs.Session = request['session']
     if request.path.startswith('/approvals') and session.user_id is None:
         raise web.HTTPUnauthorized()
