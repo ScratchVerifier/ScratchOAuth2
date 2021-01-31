@@ -46,7 +46,7 @@ class Authorization:
         if app.app_name is None:
             name = '[unnamed app]'
         elif not app.approved:
-            name = f'<span class="unmoderated"><span>{app.app_name}</span></span>'
+            name = f'[unmoderated app name]'
         else:
             name = app.app_name
         data = (data.replace('__appname__', name)
