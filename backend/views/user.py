@@ -24,8 +24,10 @@ async def check_token(request: web.Request, handler):
     if scheme != 'Bearer':
         raise web.HTTPUnauthorized()
     token = base64.b64decode(encoded)
-    # TODO: check token validity+expiry and get scopes
-    request['access_token'] = token
+    auth = await db.auth.get_authing_by_code(token.decode())
+    if auth is None:
+        raise web.HTTPUnauthorized()
+    request['auth'] = auth
     return await handler(request)
 
 user = User()
