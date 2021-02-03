@@ -1,6 +1,6 @@
 import base64
 from aiohttp import web
-from config import USERS_API
+from config import COMMENTS_API, timestamp
 import db
 import objs
 
@@ -17,21 +17,18 @@ class User:
         user = await db.user.get_by_access_token(auth.code)
         if user is None:
             raise web.HTTPNotFound()
-        async with request.config_dict['session'].get(USERS_API.format(
-            user.user_name
+        async with request.config_dict['session'].get(COMMENTS_API.format(
+            user.user_name, timestamp()
         )) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-            else:
-                data = None
-        if data is None:
+            found = resp.status == 200
+        if not found:
+            # we have data, but Scratch !200s
+            # they may just be banned, or the account may have been deleted
+            # or, in rare cases, renamed
             return web.json_response({
                 'user_id': user.user_id,
                 'user_name': user.user_name
             }, status=203)
-        user_id = data['id']
-        await db.user.set(user_id, user.user_name)
-        user = await db.user.get(user_id)
         # Step 68
         return web.json_response({'user_id': user.user_id,
                                   'user_name': user.user_name})
