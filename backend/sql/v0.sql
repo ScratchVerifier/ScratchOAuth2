@@ -2,7 +2,7 @@ PRAGMA foreign_keys = ON;
 
 -- permanent data
 
-CREATE TABLE IF NOT EXISTS scratch_users (
+CREATE TABLE IF NOT EXISTS scratchers (
   -- Scratch user ID
   user_id integer PRIMARY KEY,
   -- Scratch username
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS scratch_users (
   -- arbitrary data in case we need it
   data text
 );
-CREATE INDEX IF NOT EXISTS usernames ON scratch_users(user_name);
+CREATE INDEX IF NOT EXISTS usernames ON scratchers(user_name);
 
 CREATE TABLE IF NOT EXISTS applications (
   -- client ID
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS applications (
   -- app names must be approved
   approved boolean DEFAULT FALSE,
   -- FK
-  FOREIGN KEY(owner_id) REFERENCES scratch_users(user_id)
+  FOREIGN KEY(owner_id) REFERENCES scratchers(user_id)
 );
 
 CREATE TRIGGER IF NOT EXISTS reset_approval AFTER UPDATE OF app_name ON applications
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS approvals (
   -- approvals don't last forever, only until this time
   expiry integer NOT NULL,
   -- FKs
-  FOREIGN KEY(user_id) REFERENCES scratch_users(user_id),
+  FOREIGN KEY(user_id) REFERENCES scratchers(user_id),
   FOREIGN KEY(client_id) REFERENCES applications(client_id),
   FOREIGN KEY(access_token) REFERENCES authings(code)
 );
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   -- nonce used for login
   nonce text,
   -- keys
-  FOREIGN KEY(user_id) REFERENCES scratch_users(user_id),
+  FOREIGN KEY(user_id) REFERENCES scratchers(user_id),
   FOREIGN KEY(authing) REFERENCES authings(code)
 );
 
@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS authings (
   state text,
   expiry integer,
   -- FK
+  FOREIGN KEY(user_id) REFERENCES scratchers(user_id)
   FOREIGN KEY(client_id) REFERENCES applications(client_id)
   -- this is an alternate index
   UNIQUE(client_id, state)

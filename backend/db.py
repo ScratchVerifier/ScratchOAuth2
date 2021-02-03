@@ -404,7 +404,7 @@ class User(Database):
 
     async def get(self, user_key):
         """Get user info."""
-        query = "SELECT * FROM scratch_users WHERE "
+        query = "SELECT * FROM scratchers WHERE "
         if isinstance(user_key, str):
             query += "user_name=?"
         elif isinstance(user_key, int):
@@ -430,9 +430,9 @@ class User(Database):
 
     async def set(self, user_id: int, user_name: str):
         """Set or update user information."""
-        query1 = "SELECT data FROM scratch_users WHERE user_id=? OR user_name=?"
-        query2 = "DELETE FROM scratch_users WHERE user_id=? OR user_name=?"
-        query3 = "INSERT INTO scratch_users (user_id, user_name, data) " \
+        query1 = "SELECT data FROM scratchers WHERE user_id=? OR user_name=?"
+        query2 = "DELETE FROM scratchers WHERE user_id=? OR user_name=?"
+        query3 = "INSERT INTO scratchers (user_id, user_name, data) " \
             "VALUES (?, ?, ?)"
         async with lock:
             await self.db.execute(query1, (user_id, user_name))
