@@ -29,6 +29,7 @@ class Application(NamedTuple):
 class Authing(NamedTuple):
     """Authorization process data"""
     code: str
+    user_id: int
     client_id: int
     redirect_uri: str
     scopes: List[str]

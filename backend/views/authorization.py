@@ -12,6 +12,8 @@ class Authorization:
     async def page(self, request: web.Request):
         """Display the confirmation page."""
         session: objs.Session = request['session']
+        if session.user_id is None:
+            raise web.HTTPUnauthorized()
         # Step 34
         state = request.query.get('state', None)
         client_id = request.query.get('client_id', None)
@@ -39,7 +41,8 @@ class Authorization:
         if session.authing is None:
             # this is against the GET specification, but it's the best I can do
             await db.auth.start_auth(
-                session.session_id, state, client_id, redirect_uri, scopes)
+                session.session_id, state, session.user_id,
+                client_id, redirect_uri, scopes)
         # Step 38
         with open('templates/auth.html', 'r') as f:
             data = f.read()

@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS authings (
   -- data associated with this access token
   -- or if is token-get code, data associated
   -- with this to-be-access token
+  user_id integer,
   client_id integer NOT NULL,
   redirect_uri text NOT NULL,
   scopes text NOT NULL,

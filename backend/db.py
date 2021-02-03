@@ -189,8 +189,8 @@ class Authorization(Database):
         query = "SELECT * FROM authings WHERE code=?"
         return await self.get_authing(query, (code,))
 
-    async def start_auth(self, session_id: int, state: str, client_id: int,
-                         redirect_uri: str, scopes: List[str]):
+    async def start_auth(self, session_id: int, state: str, user_id: int,
+                         client_id: int, redirect_uri: str, scopes: List[str]):
         """Begin the app approval process."""
         await self.expire()
         auth = await self.get_authing_by_creator(client_id, state)
@@ -201,9 +201,9 @@ class Authorization(Database):
         code = token_hex(32)
         expiry = int(time()) + SHORT_EXPIRY
         # Step 36
-        query1 = "INSERT INTO authings (code, client_id, redirect_uri, " \
-            "scopes, state, expiry) VALUES (?, ?, ?, ?, ?, ?)"
-        await self.db.execute(query1, (code, client_id, redirect_uri,
+        query1 = "INSERT INTO authings (code, user_id, client_id, " \
+            "redirect_uri, scopes, state, expiry) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        await self.db.execute(query1, (code, user_id, client_id, redirect_uri,
                                        ' '.join(scopes), state, expiry))
         # Step 37
         query2 = "UPDATE sessions SET authing=? WHERE session_id=?"
@@ -299,8 +299,8 @@ class Tokens(Database):
         expiry = int(time()) + MEDIUM_EXPIRY # Step 63
         async with lock:
             # Step 63
-            query1 = "INSERT INTO authings SELECT ?, client_id, redirect_uri, " \
-                "scopes, state, ? FROM authings WHERE code=?"
+            query1 = "INSERT INTO authings SELECT ?, user_id, client_id, "\
+                "redirect_uri, scopes, state, ? FROM authings WHERE code=?"
             await self.db.execute(query1, (access_token, expiry, old))
             # Step 62
             query2 = "UPDATE approvals SET access_token=? WHERE refresh_token=?"
@@ -355,7 +355,6 @@ class Approvals(Database):
 
     async def get_by_access_token(self, access_token: str):
         """Get an approval by its access token."""
-        await self.expire()
         query = " AND access_token=?"
         row = await self.get(query, (access_token,), self.db.fetchone)
         return objs.Approval(**row) if row is not None else None

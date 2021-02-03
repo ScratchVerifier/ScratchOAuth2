@@ -14,7 +14,7 @@ class User:
         if 'identify' not in auth.scopes:
             raise web.HTTPForbidden()
         # Step 67
-        user = await db.user.get_by_access_token(auth.code)
+        user = await db.user.get(auth.user_id)
         if user is None:
             raise web.HTTPNotFound()
         async with request.config_dict['session'].get(COMMENTS_API.format(
