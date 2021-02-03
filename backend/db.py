@@ -3,7 +3,7 @@ from secrets import randbits, token_hex
 from typing import Optional, Tuple, List, Union, overload
 import asyncio
 import aiosqlite as sql
-from config import LONG_EXPIRY, MEDIUM_EXPIRY, SHORT_EXPIRY, config, timestamp
+from config import AppFlags, LONG_EXPIRY, MEDIUM_EXPIRY, SHORT_EXPIRY, config, timestamp
 import objs
 
 __all__ = ['session', 'startup', 'teardown']
@@ -89,11 +89,11 @@ class Applications(Database):
     async def application(self, owner_id: Optional[int], client_id: int):
         """Get a specific application."""
         if owner_id is not None:
-            query1 = "SELECT client_id, client_secret, app_name, approved " \
+            query1 = "SELECT client_id, client_secret, app_name, flags " \
                 "FROM applications WHERE owner_id=? AND client_id=?"
             params = (owner_id, client_id)
         else:
-            query1 = "SELECT client_id, client_secret, app_name, approved " \
+            query1 = "SELECT client_id, client_secret, app_name, flags " \
                 "FROM applications WHERE client_id=?"
             params = (client_id,)
         async with lock:
@@ -102,7 +102,7 @@ class Applications(Database):
         if row is None:
             return None
         data = dict(row)
-        data['approved'] = bool(data['approved'])
+        data['flags'] = AppFlags(data['flags'])
         query2 = "SELECT redirect_uri FROM redirect_uris WHERE client_id=?"
         async with lock:
             await self.db.execute(query2, (client_id,))
@@ -340,7 +340,7 @@ class Approvals(Database):
         await self.expire()
         query = (
             "SELECT refresh_token, approvals.client_id AS client_id, app_name"
-            "app_name, scopes, expiry, approved FROM approvals JOIN applications "
+            "app_name, scopes, expiry, flags FROM approvals JOIN applications "
             "WHERE approvals.client_id=applications.client_id" + query
         )
         async with lock:

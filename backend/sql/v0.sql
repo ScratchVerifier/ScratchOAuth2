@@ -21,16 +21,16 @@ CREATE TABLE IF NOT EXISTS applications (
   app_name text,
   -- Scratch user ID of owner
   owner_id integer NOT NULL,
-  -- app names must be approved
-  approved boolean DEFAULT FALSE,
+  -- various flags
+  flags integer DEFAULT 0,
   -- FK
   FOREIGN KEY(owner_id) REFERENCES scratchers(user_id)
 );
 
 CREATE TRIGGER IF NOT EXISTS reset_approval AFTER UPDATE OF app_name ON applications
-BEGIN UPDATE applications SET approved=(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
+BEGIN UPDATE applications SET flags=(NEW.flags & ~1)|(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
 CREATE TRIGGER IF NOT EXISTS set_approval AFTER INSERT ON applications
-BEGIN UPDATE applications SET approved=(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
+BEGIN UPDATE applications SET flags=(NEW.flags & ~1)|(NEW.app_name IS NULL) WHERE client_id=NEW.client_id; END;
 
 CREATE TABLE IF NOT EXISTS approvals (
   -- refresh token to get new access token

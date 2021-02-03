@@ -3,7 +3,7 @@ from urllib.parse import quote, urlencode
 from aiohttp import web
 import db
 import objs
-from config import (INVALID_AUTH_TITLE, INVALID_AUTH_TEXT,
+from config import (AppFlags, INVALID_AUTH_TITLE, INVALID_AUTH_TEXT,
                     SCOPES_SPLIT_REGEX, SCOPES_DESC, error)
 
 class Authorization:
@@ -45,7 +45,7 @@ class Authorization:
             data = f.read()
         if app.app_name is None:
             name = '[unnamed app]'
-        elif not app.approved:
+        elif not app.flags & AppFlags.NAME_APPROVED:
             name = f'[unmoderated app name]'
         else:
             name = escape(app.app_name)

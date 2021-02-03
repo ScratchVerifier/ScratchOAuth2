@@ -1,5 +1,6 @@
 import time
 import re
+from enum import IntFlag
 import json
 from aiohttp import web
 
@@ -47,3 +48,7 @@ async def error(title: str, message: str, status: int = 400):
             .replace('__message__', message)
             .replace('__title__', title))
     return web.Response(status=status, text=data, content_type='text/html')
+
+class AppFlags(IntFlag):
+    NONE = 0
+    NAME_APPROVED = 1

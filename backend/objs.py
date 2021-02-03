@@ -1,4 +1,5 @@
 from typing import NamedTuple, Optional, List
+from config import AppFlags
 
 class Session(NamedTuple):
     """Session data"""
@@ -22,7 +23,7 @@ class Application(NamedTuple):
     client_id: int
     client_secret: str
     app_name: Optional[str]
-    approved: bool # whether app name is approved
+    flags: AppFlags
     redirect_uris: List[str]
 
 class Authing(NamedTuple):
@@ -49,7 +50,7 @@ class Approval(NamedTuple):
     app_name: str
     scopes: List[str]
     expiry: int
-    approved: bool # whether name is approved, not the app
+    flags: AppFlags
 
 class User(NamedTuple):
     user_id: int
