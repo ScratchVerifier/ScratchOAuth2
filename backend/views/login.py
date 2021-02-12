@@ -101,7 +101,7 @@ class Login:
                 raise web.HTTPNotFound()
             data = await resp.json()
         user_id = data['id']
-        await db.login.save_user(user_id, username)
+        await db.user.set(user_id, username)
         await db.login.login_session(session.session_id, user_id)
         return web.HTTPSeeOther(returnto)
 

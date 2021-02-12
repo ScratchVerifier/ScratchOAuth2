@@ -1,3 +1,4 @@
+from time import time
 import json
 import traceback
 from aiohttp import web
@@ -93,4 +94,11 @@ async def cookie_check(request: web.Request, handler):
     request['session'] = session
     return await handler(request)
 
-middlewares = [cookie_check, errors, views.applications.check_login]
+middlewares = [
+    cookie_check,
+    errors,
+    views.applications.check_login,
+    views.authorization.check_login,
+    views.approvals.check_login,
+    views.user.check_token,
+]
