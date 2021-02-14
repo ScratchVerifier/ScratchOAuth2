@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"author": "Kenny2scratch"
+	},
+	"soa2-login-title": "Login with Scratch",
+	"soa2-scratch-username": "Scratch username:",
+	"soa2-invalid-username": "Invalid username: $1",
+	"soa2-vercode-explanation": "Please go to $1 and comment the code below:",
+	"soa2-your-profile": "your profile",
+	"soa2-next": "Next",
+	"soa2-login": "I have done so"
+}

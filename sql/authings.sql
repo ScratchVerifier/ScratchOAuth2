@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS /*_*/soa2_authings (
 	-- arbitrary string
 	state varchar(255) binary NOT NULL,
 	-- URI to redirect to (can be null)
-	redirect_uri varchar(1024) binary,
+	redirect_uri varchar(512) binary,
 	-- space-separated list of scopes being requested
 	scopes varchar(255) binary NOT NULL,
 	-- unix timestamp when this request expires
