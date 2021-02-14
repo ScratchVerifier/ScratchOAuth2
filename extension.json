@@ -18,5 +18,18 @@
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\ScratchOAuth2\\SOA2Hooks::schemaUpdates"
 	},
+	"MessagesDirs": {
+		"ScratchOAuth2": ["i18n"]
+	},
+	"SpecialPages": {
+		"ScratchOAuth2": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialScratchOAuth2"
+	},
+	"RestRoutes": [
+		{
+			"path": "/soa2/v0/login/{username}",
+			"method": ["PUT", "POST"],
+			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\Login"
+		}
+	],
 	"manifest_version": 2
 }
