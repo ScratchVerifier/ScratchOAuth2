@@ -1,6 +1,0 @@
-RewriteEngine On
-
-RewriteRule ^/?index /site [R=301,L]
-RewriteCond %{REQUEST_URI} !^/?index
-RewriteCond %{REQUEST_URI} !^/?site/?
-RewriteRule (.*) http://localhost:8008%{REQUEST_URI} [P,L]

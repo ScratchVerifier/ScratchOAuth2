@@ -1,0 +1,16 @@
+{
+	"name": "ScratchOAuth2",
+	"author": [
+		"Kenny2scratch",
+		"Semisol"
+	],
+	"url": "https://github.com/ScratchVerifier/ScratchOAuth2",
+	"description": "Since Scratch has no native OAuth, \"Fine, I'll do it myself.\"",
+	"license-name": "CC BY-SA 4.0",
+	"type": "specialpage",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\ScratchOAuth2\\Api\\": "includes/api",
+		"MediaWiki\\Extension\\ScratchOAuth2\\Special\\": "includes/special"
+	},
+	"manifest_version": 2
+}
