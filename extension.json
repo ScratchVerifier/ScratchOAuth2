@@ -8,9 +8,15 @@
 	"description": "Since Scratch has no native OAuth, \"Fine, I'll do it myself.\"",
 	"license-name": "CC BY-SA 4.0",
 	"type": "specialpage",
+	"AutoloadClasses": {
+		"MediaWiki\\Extension\\ScratchOAuth2\\SOA2Hooks": "includes/common/hooks.php"
+	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\ScratchOAuth2\\Api\\": "includes/api",
 		"MediaWiki\\Extension\\ScratchOAuth2\\Special\\": "includes/special"
+	},
+	"Hooks": {
+		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\ScratchOAuth2\\SOA2Hooks::schemaUpdates"
 	},
 	"manifest_version": 2
 }
