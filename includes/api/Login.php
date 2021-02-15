@@ -1,11 +1,12 @@
 <?php
 namespace MediaWiki\Extension\ScratchOAuth2\Api;
 
-use MediaWiki\Rest\SimpleHandler;
-use Wikimedia\ParamValidator\ParamValidator;
-
 require_once dirname(__DIR__) . "/common/consts.php";
 require_once dirname(__DIR__) . "/common/login.php";
+
+use MediaWiki\Rest\SimpleHandler;
+use Wikimedia\ParamValidator\ParamValidator;
+use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Login;
 
 /**
  * Handle logins
@@ -20,6 +21,8 @@ class Login extends SimpleHandler {
 		switch ( $request->getMethod() ) {
 			case 'PUT': // Step 13, ish
 				return $this->put( $username );
+			case 'POST': // Step 18, ish
+				return $this->post( $username );
 			default:
 				return $this->getResponseFactory()->createHttpError(405);
 		}
@@ -28,6 +31,16 @@ class Login extends SimpleHandler {
 		$resp = SOA2Login::codes( $username ); // Step 16
 		if (!$resp) return $this->getResponseFactory()->createHttpError(404);
 		return $this->getResponseFactory()->createJson($resp);
+	}
+	private function post( $username ) {
+		$data = $this->getRequest()->getBody()->getContents();
+		$data = json_decode($data, true);
+		if (!$data || !isset($data['csrf'])) {
+			return $this->getResponseFactory()->createHttpError(400);
+		}
+		$success = SOA2Login::login( $username, (string)$data['csrf'] );
+		if (!$success) return $this->getResponseFactory()->createHttpError(403);
+		return $this->getResponseFactory()->createNoContent();
 	}
 	public function needsWriteAccess() {
 		return false;
