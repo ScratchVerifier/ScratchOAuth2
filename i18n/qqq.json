@@ -8,5 +8,7 @@
 	"soa2-vercode-explanation": "Instructions for user verification. $1 is the \"your profile\" link.",
 	"soa2-your-profile": "Link text for \"your profile\"",
 	"soa2-next": "Next button text",
-	"soa2-login": "Login button text"
+	"soa2-login": "Login button text",
+	"soa2-login-failed": "Login failed error message",
+	"soa2-login-success": "Login success title"
 }

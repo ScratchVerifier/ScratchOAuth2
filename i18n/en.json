@@ -8,5 +8,7 @@
 	"soa2-vercode-explanation": "Please go to $1 and comment the code below:",
 	"soa2-your-profile": "your profile",
 	"soa2-next": "Next",
-	"soa2-login": "I have done so"
+	"soa2-login": "I have done so",
+	"soa2-login-failed": "Login failed. Please try again, and make sure you comment the code on your profile.",
+	"soa2-login-success": "Login success"
 }
