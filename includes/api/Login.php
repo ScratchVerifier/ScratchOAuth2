@@ -35,7 +35,7 @@ class Login extends SimpleHandler {
 	private function post( $username ) {
 		$data = $this->getRequest()->getBody()->getContents();
 		$data = json_decode($data, true);
-		if (!$data || !isset($data['csrf'])) {
+		if (!$data || !array_key_exists('csrf', $data) || !is_string($data['csrf'])) {
 			return $this->getResponseFactory()->createHttpError(400);
 		}
 		$success = SOA2Login::login( $username, (string)$data['csrf'] );
