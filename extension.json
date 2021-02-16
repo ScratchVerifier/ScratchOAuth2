@@ -29,6 +29,16 @@
 			"path": "/soa2/v0/login/{username}",
 			"method": ["PUT", "POST"],
 			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\Login"
+		},
+		{
+			"path": "/soa2/v0/applications",
+			"method": ["GET", "PUT"],
+			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\GenericApps"
+		},
+		{
+			"path": "/soa2/v0/applications/{client_id}",
+			"method": ["GET", "PATCH", "DELETE"],
+			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\SpecificApps"
 		}
 	],
 	"manifest_version": 2
