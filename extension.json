@@ -22,7 +22,8 @@
 		"ScratchOAuth2": ["i18n"]
 	},
 	"SpecialPages": {
-		"ScratchOAuth2": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialScratchOAuth2"
+		"ScratchOAuth2": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialScratchOAuth2",
+		"SOA2Apps": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialSOA2Apps"
 	},
 	"RestRoutes": [
 		{
