@@ -53,7 +53,7 @@ class SpecialSOA2Apps extends SpecialPage {
 		foreach (SOA2Apps::partial( $owner_id ) as $app) {
 			$link = Html::element('a', [
 				'href' => $this->getPageTitle( (string)$app['client_id'] )->getLinkURL()
-			], $app['app_name']);
+			], $app['app_name'] ?: wfMessage('soa2-unnamed-app')->text());
 			$out->addHTML(Html::rawElement('li', [], $link));
 		}
 		$out->addHTML(Html::closeElement('ul'));
@@ -74,7 +74,10 @@ class SpecialSOA2Apps extends SpecialPage {
 				$app = $this->saveApp( $owner_id, $client_id );
 			}
 		}
-		$out->setPageTitle(htmlspecialchars($app['app_name']));
+		$out->setPageTitle(
+			htmlspecialchars($app['app_name'])
+			?: wfMessage('soa2-unnamed-app')->escaped()
+		);
 		$out->addReturnTo($this->getPageTitle());
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
@@ -145,9 +148,9 @@ EOS);
 			implode("\n", $app['redirect_uris']),
 			[ 'id' => 'soa2-redirect-uris-input']
 		));
-		$confirm = json_encode(wfMessage(
+		$confirm = json_encode(htmlspecialchars(wfMessage(
 			'soa2-app-deletion-confirm', $app['app_name']
-		)->escaped());
+		)->text(), ENT_NOQUOTES));
 		$out->addHTML(Html::rawElement('p', [], Html::input(
 			'save',
 			wfMessage('soa2-app-save')->text(),
@@ -189,5 +192,65 @@ EOS);
 		$out->setPageTitle(wfMessage('soa2-app-deleted-title')->escaped());
 		$out->addWikiMsg( 'soa2-app-deleted' );
 		$out->addReturnTo($this->getPageTitle());
+	}
+
+	public function newApp( int $owner_id, ?string $error = null ) { // Step 1
+		$out = $this->getOutput();
+		$out->setPageTitle(wfMessage('soa2-app-new-title')->escaped());
+		if (!$error && $this->getRequest()->wasPosted()) {
+			$this->createApp( $owner_id );
+			return;
+		}
+		$out->addReturnTo($this->getPageTitle());
+		if ($error) {
+			$out->addHTML(Html::rawElement('p', [], Html::element(
+				'span', [ 'class' => 'error' ], $error
+			)));
+		}
+		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
+		$out->addHTML(Html::hidden('token',
+			$this->getRequest()->getSession()->getToken()->toString()));
+		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable' ]));
+		$out->addHTML(Html::openElement('tr'));
+			$out->addHTML(Html::rawElement('th', [], Html::label(
+				wfMessage('soa2-app-name')->escaped(),
+				'soa2-app-name-input'
+			)));
+			$out->addHTML(Html::rawElement('td', [], Html::input(
+				'app_name', '', 'text',
+				[ 'id' => 'soa2-app-name-input' ]
+			)));
+		$out->addHTML(Html::closeElement('tr'));
+		$out->addHTML(Html::closeElement('table'));
+		$out->addHTML(Html::rawElement('p', [], Html::label(
+			wfMessage('soa2-app-uris')->escaped(),
+			'soa2-redirect-uris-input'
+		)));
+		$out->addHTML(Html::textarea(
+			'redirect_uris', '',
+			[ 'id' => 'soa2-redirect-uris-input']
+		));
+		$out->addHTML(Html::rawElement('p', [], Html::input(
+			'create',
+			wfMessage('soa2-app-create')->text(),
+			'submit'
+		)));
+		$out->addHTML(Html::closeElement('form'));
+	}
+
+	public function createApp( int $owner_id ) {
+		$request = $this->getRequest();
+		if (!$request->getSession()->getToken()->match($request->getVal('token'))) {
+			$this->newApp( $owner_id, wfMessage('sessionfailure')->text());
+			return;
+		}
+		$app_name = trim($request->getVal('app_name')) ?: null;
+		$redirect_uris = array_map('trim', explode(
+			"\n", $request->getText('redirect_uris')
+		));
+		$app = SOA2Apps::create( $owner_id, $app_name, $redirect_uris );
+		$out = $this->getOutput();
+		$out->addWikiMsg( 'soa2-app-created' );
+		$out->addReturnTo($this->getPageTitle( (string)$app['client_id'] )); // Step 5
 	}
 }

@@ -30,5 +30,9 @@
 	"soa2-app-delete": "Delete $1",
 	"soa2-app-deleted-title": "App deleted",
 	"soa2-app-deleted": "The app has been deleted.",
-	"soa2-app-deletion-confirm": "Are you sure you want to delete \"$1\"?"
+	"soa2-app-deletion-confirm": "Are you sure you want to delete \"$1\"?",
+	"soa2-app-new-title": "Create New Application",
+	"soa2-app-create": "Create",
+	"soa2-app-created": "Application created.",
+	"soa2-unnamed-app": "[unnamed application]"
 }
