@@ -2,7 +2,9 @@
 	"@metadata": {
 		"author": "Kenny2scratch"
 	},
+	"soa2-notloggedin": "Message that redirects to login page. A \"Return to Special:ScratchOAuth2/login\" message follows it.",
 	"soa2-login-title": "Title of Special:ScratchOAuth2/login",
+	"soa2-apps-title": "Title of Special:SOA2Apps",
 	"soa2-scratch-username": "Label for Scratch username field",
 	"soa2-invalid-username": "Error message for invalid username",
 	"soa2-vercode-explanation": "Instructions for user verification. $1 is the \"your profile\" link.",
@@ -10,5 +12,7 @@
 	"soa2-next": "Next button text",
 	"soa2-login": "Login button text",
 	"soa2-login-failed": "Login failed error message",
-	"soa2-login-success": "Login success title"
+	"soa2-login-success": "Login success title",
+	"soa2-apps": "Description of list of apps",
+	"soa2-new-app": "Action link for new app, also title of such page"
 }
