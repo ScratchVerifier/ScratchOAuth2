@@ -14,5 +14,21 @@
 	"soa2-login-failed": "Login failed error message",
 	"soa2-login-success": "Login success title",
 	"soa2-apps": "Description of list of apps",
-	"soa2-new-app": "Action link for new app, also title of such page"
+	"soa2-new-app": "Action link for new app, also title of such page",
+	"soa2-no-app-title": "Error page title when no application can be found",
+	"soa2-no-app": "Error when application cannot be found. $1 is the app ID.",
+	"soa2-app-id": "Table header for client ID",
+	"soa2-app-secret": "Table header for client secret (with nbsp to not wrap)",
+	"soa2-app-name": "Label for app name field",
+	"soa2-app-reset": "Label for reset-secret checkbox",
+	"soa2-flags": "Title of flags table",
+	"soa2-flags-yes": "Boolean true",
+	"soa2-flags-no": "Boolean false",
+	"soa2-flags-1": "Label for NAME_APPROVED flag",
+	"soa2-app-uris": "Title of redirect URIs section",
+	"soa2-app-save": "Save button text",
+	"soa2-app-delete": "Delete button text",
+	"soa2-app-deleted-title": "Successful deletion page title",
+	"soa2-app-deleted": "App deletion success message",
+	"soa2-app-deletion-confirm": "Confirmation message for deleting an app"
 }
