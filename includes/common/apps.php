@@ -53,6 +53,7 @@ class SOA2Apps {
 	 */
 	public static function application( int $client_id, int $owner_id ) {
 		$app = SOA2DB::getApplication( $client_id, $owner_id );
+		if (!$app) return null;
 		return [
 			'client_id' => intval($app->client_id),
 			'client_secret' => $app->client_secret,
