@@ -30,5 +30,9 @@
 	"soa2-app-delete": "Delete button text",
 	"soa2-app-deleted-title": "Successful deletion page title",
 	"soa2-app-deleted": "App deletion success message",
-	"soa2-app-deletion-confirm": "Confirmation message for deleting an app"
+	"soa2-app-deletion-confirm": "Confirmation message for deleting an app",
+	"soa2-app-new-title": "Title of app creation page",
+	"soa2-app-create": "Create button text",
+	"soa2-app-created": "Application creation success message",
+	"soa2-unnamed-app": "Placeholder for name of app when app is unnamed"
 }
