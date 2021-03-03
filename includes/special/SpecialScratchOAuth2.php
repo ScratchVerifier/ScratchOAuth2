@@ -25,10 +25,10 @@ class SpecialScratchOAuth2 extends SpecialPage {
 				break;
 			default:
 				$out->setPageTitle( 'ScratchOAuth2' );
-				$user_id = $this->getRequest()->getSessionData('soa2_user_id');
+				$user_id = SOA2Apps::userID();
 				$out->addHTML(
 					"<p>Your Scratch user ID is "
-					. ($user_id ? $user_id : 'not set')
+					. ($user_id ?: 'not set')
 					. "</p>"
 				);
 		}
