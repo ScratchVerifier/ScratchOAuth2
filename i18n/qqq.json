@@ -34,5 +34,13 @@
 	"soa2-app-new-title": "Title of app creation page",
 	"soa2-app-create": "Create button text",
 	"soa2-app-created": "Application creation success message",
-	"soa2-unnamed-app": "Placeholder for name of app when app is unnamed"
+	"soa2-unnamed-app": "Placeholder for name of app when app is unnamed",
+	"soa2-unmoderated-app": "Placeholder for name of app when the name is not yet moderated",
+	"soa2-auth-title": "Title of Special:ScratchOAuth2/authorize. $1 is the app name.",
+	"soa2-auth-desc": "Question part of auth flow. $1 is the (escaped) app name.",
+	"soa2-auth-invalid-title": "Title of Special:ScratchOAuth2/authorize when parameter validation fails",
+	"soa2-auth-invalid": "Error message when parameter validation fails",
+	"soa2-auth-cancelled-title": "Title of Special:ScratchOAuth2/authorize after clicking Cancel",
+	"soa2-auth-cancelled": "Cancel success message",
+	"soa2-scope-identify": "Description of \"identify\" scope"
 }

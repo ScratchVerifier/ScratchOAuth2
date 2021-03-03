@@ -34,5 +34,13 @@
 	"soa2-app-new-title": "Create New Application",
 	"soa2-app-create": "Create",
 	"soa2-app-created": "Application created.",
-	"soa2-unnamed-app": "[unnamed application]"
+	"soa2-unnamed-app": "[unnamed application]",
+	"soa2-unmoderated-app": "[application name unmoderated]",
+	"soa2-auth-title": "Authorizing $1",
+	"soa2-auth-desc": "Authorize $1? It will be able to:",
+	"soa2-auth-invalid-title": "Invalid Auth URL",
+	"soa2-auth-invalid": "You have been given a faulty authorization URL.\n<br/>Please contact whoever gave you this URL and inform them of this.",
+	"soa2-auth-cancelled-title": "Authorization Cancelled",
+	"soa2-auth-cancelled": "Authorizing the app has been cancelled.",
+	"soa2-scope-identify": "Know who you are on Scratch"
 }
