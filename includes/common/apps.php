@@ -51,7 +51,7 @@ class SOA2Apps {
 	 * @param int $client_id the ID of the app
 	 * @param int $owner_id the owner of the app, to guard perms
 	 */
-	public static function application( int $client_id, int $owner_id ) {
+	public static function application( int $client_id, ?int $owner_id ) {
 		$app = SOA2DB::getApplication( $client_id, $owner_id );
 		if (!$app) return null;
 		return [
@@ -107,7 +107,7 @@ class SOA2Apps {
 		if (array_key_exists('app_name', $args)) {
 			$app_name = $args['app_name'];
 			$set['app_name'] = $app_name;
-			$flags = $app->flags;
+			$flags = intval($app->flags);
 			$flags &= ~AppFlags::NAME_APPROVED;
 			if ($app_name === null) $flags |= AppFlags::NAME_APPROVED;
 			$set['flags'] = $flags;
