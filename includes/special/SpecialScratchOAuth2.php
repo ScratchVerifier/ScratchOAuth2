@@ -129,19 +129,12 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			);
 			return;
 		}
-		$out = $this->getOutput();
-		$out->addHTML(Html::element('h2', [], wfMessage('soa2-login-success')->plain()));
 		// Step 24
 		$link = $request->getVal(
 			'returnto',
-			Title::newFromText('Special:ScratchOAuth2')->getFullURL()
+			$this->getPageTitle()->getFullURL()
 		);
-		$link = Html::element(
-			'a',
-			[ 'href' => $link ],
-			$link
-		);
-		$out->addHTML(Html::rawElement('p', [], wfMessage('returnto', $link)->text()));
+		$this->getOutput()->redirect( $link, 303 );
 	}
 
 	public function error( string $error ) {
