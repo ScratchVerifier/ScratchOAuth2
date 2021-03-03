@@ -101,4 +101,32 @@ class SOA2DB {
 		$dbw->delete('soa2_authings', ['client_id' => $client_id]);
 		$dbw->delete('soa2_applications', ['client_id' => $client_id]);
 	}
+	// auth methods
+	public static function startAuth(
+		string $code, int $client_id, int $user_id, string $state,
+		string $redirect_uri, array $scopes, int $expiry
+	) {
+		self::dbw()->insert(
+			'soa2_authings',
+			[
+				'code' => $code,
+				'client_id' => $client_id,
+				'user_id' => $user_id,
+				'state' => $state,
+				'redirect_uri' => $redirect_uri,
+				'scopes' => implode(' ', $scopes),
+				'expiry' => $expiry
+			]
+		);
+	}
+	public static function getAuth( string $code ) {
+		self::expireAuth();
+		return self::dbr()->selectRow('soa2_authings', '*', ['code' => $code]);
+	}
+	public static function expireAuth() {
+		self::dbw()->delete('soa2_authings', 'expiry<' . time());
+	}
+	public static function cancelAuth( int $user_id ) {
+		self::dbw()->delete('soa2_authings', ['user_id' => $user_id]);
+	}
 }
