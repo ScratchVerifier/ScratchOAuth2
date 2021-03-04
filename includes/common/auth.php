@@ -45,7 +45,7 @@ class SOA2Auth {
 	 * @return string authing code to be set in session
 	 */
 	public static function start( array $data, int $user_id ) {
-		$code = hash('sha256', random_bytes(64)); // Step 26
+		$code = bin2hex(random_bytes(32)); // Step 26
 		SOA2DB::startAuth( // Step 27
 			$code, $data['client_id'], $user_id, $data['state'],
 			$data['redirect_uri'], $data['scopes'], time() + SOA2_AUTH_EXPIRY
