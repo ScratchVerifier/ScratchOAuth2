@@ -129,4 +129,36 @@ class SOA2DB {
 	public static function cancelAuth( int $user_id ) {
 		self::dbw()->delete('soa2_authings', ['user_id' => $user_id]);
 	}
+	public static function useAuth( string $code ) {
+		self::dbw()->delete('soa2_authings', ['code' => $code]);
+	}
+	// token methods
+	public static function saveRefreshToken(
+		string $token, int $client_id, int $user_id, array $scopes, int $expiry
+	) {
+		self::dbw()->insert(
+			'soa2_refresh_tokens',
+			[
+				'token' => $token,
+				'client_id' => $client_id,
+				'user_id' => $user_id,
+				'scopes' => implode(' ', $scopes),
+				'expiry' => $expiry
+			]
+		);
+	}
+	public static function saveAccessToken(
+		string $token, string $refresh_token, int $client_id, int $user_id, int $expiry
+	) {
+		self::dbw()->insert(
+			'soa2_access_tokens',
+			[
+				'token' => $token,
+				'refresh_token' => $refresh_token,
+				'client_id' => $client_id,
+				'user_id' => $user_id,
+				'expiry' => $expiry
+			]
+		);
+	}
 }
