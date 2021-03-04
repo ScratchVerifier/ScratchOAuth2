@@ -174,7 +174,15 @@ class SOA2DB {
 	public static function getRefreshToken( string $token ) {
 		// Unlike authings, we don't expire refresh tokens automatically.
 		// This is to let the API give the client a 410 Gone on expired tokens.
-		// Instead, any previous refresh tokens
+		// Instead, any previous refresh tokens are deleted before making new ones.
 		return self::dbr()->selectRow('soa2_refresh_tokens', '*', ['token' => $token]);
+	}
+	public static function getAccessToken( string $token ) {
+		// Unlike refresh tokens, we do expire these automatically
+		self::expireAccessTokens();
+		return self::dbr()->selectRow('soa2_access_tokens', '*', ['token' => $token]);
+	}
+	public static function expireAccessTokens() {
+		self::dbw()->delete('soa2_access_tokens', 'expiry<' . time());
 	}
 }
