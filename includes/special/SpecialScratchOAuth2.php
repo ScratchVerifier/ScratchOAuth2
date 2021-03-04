@@ -152,9 +152,9 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		$out = $this->getOutput();
 		if (!$user_id) { // Step 9
 			// Step 10
-			$out->redirect( $this->getPageTitle( 'login' )->getLinkURL([
+			$out->redirect($this->getPageTitle( 'login' )->getLinkURL([
 				'returnto' => $request->getRequestURL()
-			]), 303 );
+			]), 303);
 			return;
 		}
 		if ($error) {
@@ -203,18 +203,19 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		$out->addHTML(Html::closeElement('form'));
 	}
 
-	public function doAuth( int $user_id ) {
+	public function doAuth( int $user_id ) { // Step 30
 		$request = $this->getRequest();
-		if (!$request->getSession()->getToken()->match($request->getVal('token'))) {
+		$session = $request->getSession();
+		if (!$session->getToken()->match($request->getVal('token'))) {
 			$this->specialAuth( wfMessage('sessionfailure')->text() );
 			return;
 		}
 		$out = $this->getOutput();
 		if ($request->getCheck('cancel')) {
 			SOA2Auth::cancel( $user_id );
-			$request->getSession()->remove('soa2_authing');
+			$session->remove('soa2_authing');
 			$out->setPageTitle( wfMessage('soa2-auth-cancelled-title')->escaped() );
-			$out->addHTML(wfMessage('soa2-auth-cancelled')->parse());
+			$out->addWikiMsg('soa2-auth-cancelled');
 			$out->returnToMain();
 			return;
 		}
