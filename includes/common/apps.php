@@ -104,7 +104,10 @@ class SOA2Apps {
 			$client_secret = bin2hex(random_bytes(64));
 			$set['client_secret'] = $client_secret;
 		}
-		if (array_key_exists('app_name', $args)) {
+		if (
+			array_key_exists('app_name', $args)
+			&& $app->app_name != $args['app_name']
+		) {
 			$app_name = $args['app_name'];
 			$set['app_name'] = $app_name;
 			$flags = intval($app->flags);
