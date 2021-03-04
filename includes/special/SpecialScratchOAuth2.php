@@ -170,7 +170,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			return;
 		}
 		$app = SOA2Apps::application( $data['client_id'], $data['owner_id'] );
-		if (!SOA2Auth::get($session->get('soa2_authing'))) {
+		if (!SOA2Auth::get($session->get('soa2_authing') ?? '')) {
 			SOA2Auth::cancel( $user_id ); // Just to be safe
 			// Step 28
 			$session->set('soa2_authing', SOA2Auth::start( $data, $user_id ));
@@ -226,7 +226,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			// or the authing itself might be null if the code has been used
 			// or in hopefully rare cases, if the authing has been expired
 			// either way the result will be null so this is 2 birds 1 stone
-			|| !($dbData = SOA2Auth::get($session->get('soa2_authing')))
+			|| !($dbData = SOA2Auth::get($session->get('soa2_authing') ?? ''))
 			|| $reqData['redirect_uri'] != $dbData['redirect_uri']
 			|| $reqData['scopes'] != $dbData['scopes']
 			|| $reqData['state'] != $dbData['state']
