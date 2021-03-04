@@ -140,7 +140,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 	public function error( string $error ) {
 		$this->getOutput()->addHTML(Html::rawElement(
 			'p', [],
-			Html::element('span', [ 'class' => 'error' ], $error)
+			Html::rawElement('span', [ 'class' => 'error' ], $error)
 		));
 	}
 
