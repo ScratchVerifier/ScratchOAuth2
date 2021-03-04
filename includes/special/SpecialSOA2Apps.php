@@ -23,10 +23,11 @@ class SpecialSOA2Apps extends SpecialPage {
 		$owner_id = SOA2Apps::userID();
 		if (!$owner_id) {
 			$out->setPageTitle( wfMessage('notloggedin')->escaped() );
-			$out->addWikiMsg('soa2-notloggedin');
-			$out->addReturnTo( $this->getTitleFor( 'ScratchOAuth2', 'login' ), [
-				'returnto' => $this->getPageTitle( $par )->getFullURL()
-			] );
+			$out->redirect(
+				$this->getTitleFor( 'ScratchOAuth2', 'login' )->getFullURL([
+					'returnto' => $this->getPageTitle( $par )->getLinkURL()
+				]), 303
+			);
 			return;
 		}
 		$this->getRequest()->getSession()->persist();

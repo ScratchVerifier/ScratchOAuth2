@@ -2,7 +2,6 @@
 	"@metadata": {
 		"author": "Kenny2scratch"
 	},
-	"soa2-notloggedin": "Message that redirects to login page. A \"Return to Special:ScratchOAuth2/login\" message follows it.",
 	"soa2-login-title": "Title of Special:ScratchOAuth2/login",
 	"soa2-apps-title": "Title of Special:SOA2Apps",
 	"soa2-scratch-username": "Label for Scratch username field",
