@@ -36,7 +36,7 @@ class SOA2Tokens {
 	 * @param int $authing['user_id'] the user ID that this token accesses
 	 */
 	public static function newAccessToken( string $refresh_token, array $authing ) {
-		$access_token = bin2hex(random_bytes(64)); // Step 40
+		$access_token = bin2hex(random_bytes(64)); // Step 40 or 52
 		$access_expiry = time() + SOA2_ACCESS_TOKEN_EXPIRY;
 		SOA2DB::saveAccessToken( // Step 41
 			$access_token, $refresh_token, $authing['client_id'],
@@ -45,6 +45,23 @@ class SOA2Tokens {
 		return [
 			'access_token' => $access_token,
 			'access_expiry' => $access_expiry,
+		];
+	}
+	/**
+	 * Get data for a refresh token
+	 * @param string $token the token
+	 * @param bool $null_on_expiry if true and the token is expired, returns null
+	 */
+	public static function getRefreshToken( string $token, bool $null_on_expiry = true ) {
+		$token = SOA2DB::getRefreshToken( $token );
+		if (!$token) return null;
+		if ($null_on_expiry && intval($token->expiry) < time()) return null;
+		return [
+			'token' => $token->token,
+			'client_id' => intval($token->client_id),
+			'user_id' => intval($token->user_id),
+			'scopes' => explode(' ', $token->scopes),
+			'expiry' => intval($token->expiry)
 		];
 	}
 }
