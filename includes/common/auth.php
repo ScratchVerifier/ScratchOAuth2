@@ -58,6 +58,7 @@ class SOA2Auth {
 	 */
 	public static function get( string $code ) {
 		$authing = SOA2DB::getAuth( $code );
+		if (!$authing) return null;
 		return [
 			'code' => $authing->code,
 			'client_id' => intval($authing->client_id),
