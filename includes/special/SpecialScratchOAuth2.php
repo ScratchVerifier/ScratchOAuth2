@@ -219,5 +219,30 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			$out->returnToMain();
 			return;
 		}
+		if (
+			!($reqData = SOA2Auth::requestData( $request ))
+			|| !($dbData = SOA2Auth::get($session->get('soa2_authing')))
+			|| $reqData['redirect_uri'] != $dbData['redirect_uri']
+			|| $reqData['scopes'] != $dbData['scopes']
+			|| $reqData['state'] != $dbData['state']
+			|| $reqData['client_id'] != $dbData['client_id']
+		) {
+			SOA2Auth::cancel( $user_id );
+			$session->remove('soa2_authing');
+			$this->specialAuth( wfMessage('soa2-auth-maybe-invalid')->text() );
+			return;
+		}
+		// Step 31
+		$uri = $dbData['redirect_uri'] ?: $this->getTitleFor('SOA2Code')->getFullURL();
+		// Step 32
+		$code = $dbData['code'];
+		$state = $dbData['state'];
+		// Step 33
+		$query = http_build_query([
+			'code' => $code,
+			'state' => $state
+		], null, '&', PHP_QUERY_RFC3986);
+		$uri .= (parse_url($uri, PHP_URL_QUERY) ? '&' : '?') . $query;
+		$out->redirect($uri, 303);
 	}
 }
