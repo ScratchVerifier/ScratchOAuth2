@@ -23,9 +23,7 @@ class SpecialSOA2Apps extends SpecialPage {
 		$owner_id = SOA2Apps::userID();
 		if (!$owner_id) {
 			$out->setPageTitle( wfMessage('notloggedin')->escaped() );
-			$out->addHTML(Html::element(
-				'p', [], wfMessage('soa2-notloggedin')->text()
-			));
+			$out->addWikiMsg('soa2-notloggedin');
 			$out->addReturnTo( $this->getTitleFor( 'ScratchOAuth2', 'login' ), [
 				'returnto' => $this->getPageTitle( $par )->getFullURL()
 			] );
@@ -44,7 +42,7 @@ class SpecialSOA2Apps extends SpecialPage {
 	public function apps( int $owner_id ) {
 		$out = $this->getOutput();
 		$out->setPageTitle( wfMessage('soa2-apps-title')->escaped() );
-		$out->addHTML(Html::element('p', [], wfMessage('soa2-apps')->text()));
+		$out->addWikiMsg('soa2-apps');
 		$out->addHTML(Html::rawElement('p', [], Html::element(
 			'a', [ 'href' => $this->getPageTitle( 'new' )->getLinkURL() ],
 			wfMessage('soa2-new-app')->text()

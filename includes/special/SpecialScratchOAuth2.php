@@ -165,7 +165,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		}
 		if (!($data = SOA2Auth::requestData( $request ))) { // Step 25
 			$out->setPageTitle( wfMessage('soa2-auth-invalid-title')->escaped() );
-			$out->addHTML(wfMessage('soa2-auth-invalid')->parse());
+			$out->addWikiMsg('soa2-auth-invalid');
 			$out->returnToMain();
 			return;
 		}
@@ -182,7 +182,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			$name = $app['app_name'];
 		}
 		$out->setPageTitle( wfMessage('soa2-auth-title', $name)->escaped() );
-		$out->addHTML(wfMessage('soa2-auth-desc', htmlspecialchars($name))->parse());
+		$out->addWikiMsg('soa2-auth-desc', htmlspecialchars($name));
 		$out->addHTML(Html::openElement('ul'));
 		foreach ($data['scopes'] as $scope) {
 			$out->addHTML(Html::element(
