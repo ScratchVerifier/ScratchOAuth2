@@ -136,7 +136,12 @@ class SOA2DB {
 	public static function saveRefreshToken(
 		string $token, int $client_id, int $user_id, array $scopes, int $expiry
 	) {
-		self::dbw()->insert(
+		$dbw = self::dbw();
+		$dbw->delete(
+			'soa2_refresh_tokens',
+			['client_id' => $client_id, 'user_id' => $user_id]
+		);
+		$dbw->insert(
 			'soa2_refresh_tokens',
 			[
 				'token' => $token,
@@ -150,7 +155,12 @@ class SOA2DB {
 	public static function saveAccessToken(
 		string $token, string $refresh_token, int $client_id, int $user_id, int $expiry
 	) {
-		self::dbw()->insert(
+		$dbw = self::dbw();
+		$dbw->delete(
+			'soa2_access_tokens',
+			['client_id' => $client_id, 'refresh_token' => $refresh_token]
+		);
+		$dbw->insert(
 			'soa2_access_tokens',
 			[
 				'token' => $token,
@@ -160,5 +170,11 @@ class SOA2DB {
 				'expiry' => $expiry
 			]
 		);
+	}
+	public static function getRefreshToken( string $token ) {
+		// Unlike authings, we don't expire refresh tokens automatically.
+		// This is to let the API give the client a 410 Gone on expired tokens.
+		// Instead, any previous refresh tokens
+		return self::dbr()->selectRow('soa2_refresh_tokens', '*', ['token' => $token]);
 	}
 }
