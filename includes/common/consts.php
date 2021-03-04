@@ -11,6 +11,8 @@ define('SOA2_SCOPES_SPLIT_REGEX', '%(?<=[a-z])(?=[, +])(?:\+|,? ?)(?=[a-z])%');
 define('SOA2_SCOPES', [
 	'identify',
 ]);
+define('SOA2_REFRESH_TOKEN_EXPIRY', 365*24*60*60);
+define('SOA2_ACCESS_TOKEN_EXPIRY', 24*60*60);
 define('SOA2_AUTH_EXPIRY', 60*60);
 define('SOA2_CODE_EXPIRY', 30*60);
 

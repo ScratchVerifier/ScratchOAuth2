@@ -41,6 +41,11 @@
 			"path": "/soa2/v0/applications/{client_id}",
 			"method": ["GET", "PATCH", "DELETE"],
 			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\SpecificApps"
+		},
+		{
+			"path": "/soa2/v0/tokens",
+			"method": ["POST", "PATCH"],
+			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\Tokens"
 		}
 	],
 	"manifest_version": 2
