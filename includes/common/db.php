@@ -104,7 +104,7 @@ class SOA2DB {
 	// auth methods
 	public static function startAuth(
 		string $code, int $client_id, int $user_id, string $state,
-		string $redirect_uri, array $scopes, int $expiry
+		?string $redirect_uri, array $scopes, int $expiry
 	) {
 		self::dbw()->insert(
 			'soa2_authings',
