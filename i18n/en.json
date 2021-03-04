@@ -38,7 +38,10 @@
 	"soa2-auth-desc": "Authorize $1? It will be able to:",
 	"soa2-auth-invalid-title": "Invalid Auth URL",
 	"soa2-auth-invalid": "You have been given a faulty authorization URL.\n<br/>Please contact whoever gave you this URL and inform them of this.",
+	"soa2-auth-maybe-invalid": "Authorization failed. Please read the page below and try again.\n<br/>If the problem persists, you may have been given a faulty authorization URL.\n<br/>Contact whoever gave you this URL and inform them of this.",
 	"soa2-auth-cancelled-title": "Authorization Cancelled",
 	"soa2-auth-cancelled": "Authorizing the app has been cancelled.",
+	"soa2-code-title": "ScratchOAuth2 Code",
+	"soa2-code": "Please copy the code below and paste it into the application that brought you here:",
 	"soa2-scope-identify": "Know who you are on Scratch"
 }
