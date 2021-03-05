@@ -182,7 +182,16 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		} else {
 			$name = $app['app_name'];
 		}
-		$out->setPageTitle( wfMessage('soa2-auth-title', $name)->escaped() );
+		if ($app['flags'] & AppFlags::VERIFIED) {
+			$check = Html::rawElement('sup', [], Html::element(
+				'abbr',
+				[ 'title' => wfMessage('soa2-auth-verified')->text(), 'style' => 'cursor: help' ],
+				html_entity_decode('&#x2713;', ENT_HTML5, 'UTF-8')
+			));
+		} else {
+			$check = '';
+		}
+		$out->setPageTitle( wfMessage('soa2-auth-title', $name, $check)->parse() );
 		$out->addWikiMsg('soa2-auth-desc', htmlspecialchars($name));
 		$out->addHTML(Html::openElement('ul'));
 		foreach ($data['scopes'] as $scope) {
