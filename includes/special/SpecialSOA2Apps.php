@@ -129,13 +129,28 @@ EOS);
 		$out->addHTML(Html::element('caption', [], wfMessage('soa2-flags')->text()));
 		$flagsClass = new ReflectionClass(AppFlags::class);
 		foreach ($flagsClass->getConstants() as $name => $value) {
-			$msg = wfMessage("soa2-flags-$value")->escaped();
+			$out->addHTML(Html::openElement('tr'));
+			$out->addHTML(Html::element(
+				'th', [ 'title' => $name ],
+				wfMessage("soa2-flags-$name")->text()
+			));
+			$flag = $app['flags'] & $value;
 			$msgValue = wfMessage(
-				($app['flags'] & $value)
-				? 'soa2-flags-yes'
-				: 'soa2-flags-no'
-			)->escaped();
-			$out->addHTML("<tr><th title=\"$name\">$msg</th><td>$msgValue</td></tr>");
+				$flag ? 'soa2-flags-yes' : 'soa2-flags-no'
+			)->text();
+			if ($flag) {
+				$out->addHTML(Html::element(
+					'td', [ 'colspan' => 2 ],
+					$msgValue
+				));
+			} else {
+				$out->addHTML(Html::element('td', [], $msgValue));
+				$out->addHTML(Html::rawElement(
+					'td', [],
+					wfMessage("soa2-flags-not-$name")->parse()
+				));
+			}
+			$out->addHTML(Html::closeElement('tr'));
 		}
 		$out->addHTML(Html::closeElement('table'));
 		$out->addHTML(Html::rawElement('p', [], Html::label(
