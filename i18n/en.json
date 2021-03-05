@@ -18,6 +18,7 @@
 	"soa2-app-id": "Client ID",
 	"soa2-app-secret": "Client\u00a0secret",
 	"soa2-app-name": "App name",
+	"soa2-app-owner": "Owner",
 	"soa2-app-reset": "Reset secret (check then click Save)",
 	"soa2-flags": "Flags",
 	"soa2-flags-yes": "Yes",
@@ -47,5 +48,7 @@
 	"soa2-auth-cancelled": "Authorizing the app has been cancelled.",
 	"soa2-code-title": "ScratchOAuth2 Code",
 	"soa2-code": "Please copy the code below and paste it into the application that brought you here:",
-	"soa2-scope-identify": "Know who you are on Scratch"
+	"soa2-scope-identify": "Know who you are on Scratch",
+	"soa2-not-admin-title": "Not admin",
+	"soa2-not-admin": "You are not a ScratchOAuth2 admin and are denied access to this page."
 }
