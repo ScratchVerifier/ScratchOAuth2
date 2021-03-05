@@ -24,7 +24,8 @@
 	"SpecialPages": {
 		"ScratchOAuth2": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialScratchOAuth2",
 		"SOA2Apps": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialSOA2Apps",
-		"SOA2Code": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialSOA2Code"
+		"SOA2Code": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialSOA2Code",
+		"SOA2Admin": "MediaWiki\\Extension\\ScratchOAuth2\\Special\\SpecialSOA2Admin"
 	},
 	"RestRoutes": [
 		{

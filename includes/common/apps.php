@@ -49,18 +49,20 @@ class SOA2Apps {
 	/**
 	 * Get a full application object
 	 * @param int $client_id the ID of the app
-	 * @param int $owner_id the owner of the app, to guard perms
+	 * @param int|null $owner_id the owner of the app, to guard perms
 	 */
 	public static function application( int $client_id, ?int $owner_id ) {
 		$app = SOA2DB::getApplication( $client_id, $owner_id );
 		if (!$app) return null;
-		return [
+		$res = [
 			'client_id' => intval($app->client_id),
 			'client_secret' => $app->client_secret,
 			'app_name' => $app->app_name,
 			'flags' => intval($app->flags),
 			'redirect_uris' => $app->redirect_uris
 		];
+		if (!$owner_id) $res['owner_id'] = intval($app->owner_id);
+		return $res;
 	}
 	/**
 	 * Register a new application
