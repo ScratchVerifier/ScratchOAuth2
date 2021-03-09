@@ -54,16 +54,43 @@ class SpecialSOA2Admin extends SpecialPage {
 			case 'approvals':
 				$this->approvals( $path );
 				break;
+			case 'apps':
+				$this->apps( $path );
+				break;
 			case 'app':
 				$this->app( $path );
 				break;
 			default:
 				$out->setPageTitle( 'SOA2Admin' );
-				$out->addHTML(Html::element(
-					'pre', [],
-					var_export($this->getRequest()->getIntArray('test'), true)
-				));
-				$out->addHTML(Html::element('pre', [], var_export($user_id, true)));
+		}
+	}
+	public function apps( array $path ) {
+		$out = $this->getOutput();
+		$username = $this->getRequest()->getVal('username', $path[0]);
+		$user_id = SOA2Users::getID( $username ?: '' );
+		if ($user_id) {
+			$out->addReturnTo($this->getPageTitle( 'apps' ));
+			$out->setPageTitle(
+				wfMessage('soa2-admin-apps-namedtitle', $username)->escaped() );
+			$out->addHTML(Html::openElement('ul'));
+			foreach (SOA2Apps::partial( $user_id ) as $app) {
+				$link = Html::element('a', [
+					'href' => $this->getPageTitle( 'app/' . $app['client_id'] )->getLinkURL()
+				], $app['app_name'] ?: wfMessage('soa2-unnamed-app')->text());
+				$out->addHTML(Html::rawElement('li', [], $link));
+			}
+			$out->addHTML(Html::closeElement('ul'));
+		} else {
+			$out->addReturnTo($this->getPageTitle());
+			$out->setPageTitle( wfMessage('soa2-admin-apps-title')->escaped() );
+			$out->addHTML(Html::openElement('form', [ 'method' => 'GET' ]));
+			$out->addHTML(Html::rawElement('p', [], Html::input(
+				'username', '', 'text', [ 'id' => 'soa2-username-input' ]
+			)));
+			$out->addHTML(Html::rawElement('p', [], Html::submitButton(
+				wfMessage('soa2-admin-apps-submit')->escaped(), []
+			)));
+			$out->addHTML(Html::closeElement('form'));
 		}
 	}
 	public function app( array $path ) {
@@ -83,7 +110,8 @@ class SpecialSOA2Admin extends SpecialPage {
 			htmlspecialchars($app['app_name'])
 			?: wfMessage('soa2-unnamed-app')->escaped()
 		);
-		$out->addReturnTo($this->getPageTitle());
+		$owner = SOA2Users::getName($app['owner_id']);
+		$out->addReturnTo($this->getPageTitle( 'apps/' . $owner ));
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
 			$this->getRequest()->getSession()->getToken()->toString()));
@@ -109,8 +137,7 @@ class SpecialSOA2Admin extends SpecialPage {
 				'th', [],
 				wfMessage('soa2-app-owner')->text()
 			));
-			$out->addHTML(Html::rawElement(
-				'td', [], makeProfileLink(SOA2Users::getName($app['owner_id']))));
+			$out->addHTML(Html::rawElement('td', [], makeProfileLink($owner)));
 		$out->addHTML(Html::closeElement('tr'));
 		$out->addHTML(Html::closeElement('table'));
 		$out->addHTML(Html::rawElement('p', [], Html::check(

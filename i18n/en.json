@@ -51,8 +51,11 @@
 	"soa2-scope-identify": "Know who you are on Scratch",
 	"soa2-not-admin-title": "Not admin",
 	"soa2-not-admin": "You are not a ScratchOAuth2 admin and are denied access to this page.",
-	"soa2-admin-approvals": "Name Approvals",
+	"soa2-admin-approvals": "Application name approvals",
 	"soa2-admin-approvals-name": "Application Name",
 	"soa2-admin-approvals-check": "\u2713?",
-	"soa2-admin-approvals-submit": "Approve Checked"
+	"soa2-admin-approvals-submit": "Approve Checked",
+	"soa2-admin-apps-title": "Manage apps",
+	"soa2-admin-apps-namedtitle": "Manage apps for $1",
+	"soa2-admin-apps-submit": "Get apps for this username"
 }
