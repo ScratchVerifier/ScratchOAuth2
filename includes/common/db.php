@@ -42,6 +42,16 @@ class SOA2DB {
 			['owner_id' => $owner_id]
 		);
 	}
+	public static function getAppsNeedingNameApproval( int $maxRows ) {
+		return self::dbr()->select(
+			['soa2_applications', 'soa2_scratchers'],
+			['client_id', 'app_name', 'user_name AS owner_name'],
+			['flags&1=0'],
+			__METHOD__,
+			['LIMIT' => $maxRows],
+			['soa2_scratchers' => ['LEFT JOIN', 'user_id=owner_id']]
+		);
+	}
 	public static function getApplication(
 		int $client_id, ?int $owner_id = null, bool $fetch_redirect_uris = true
 	) {
@@ -88,6 +98,12 @@ class SOA2DB {
 		self::dbw()->update(
 			'soa2_applications', $set,
 			['client_id' => $client_id]
+		);
+	}
+	public static function approveAppNames( array $client_ids ) {
+		self::dbw()->update(
+			'soa2_applications', ['flags=flags|1'],
+			['client_id' => $client_ids]
 		);
 	}
 	public static function deleteRedirectURIs( int $client_id ) {
