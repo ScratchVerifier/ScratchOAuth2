@@ -144,4 +144,29 @@ class SpecialSOA2Admin extends SpecialPage {
 		)));
 		$out->addHTML(Html::closeElement('form'));
 	}
+	public function saveApp( array $path, array $app ) {
+		$request = $this->getRequest();
+		if (!$request->getSession()->getToken()->match($request->getVal('token'))) {
+			$out->addWikiMsg( 'sessionfailure' );
+			return;
+		}
+		$args = [];
+		if ($request->getCheck('reset_secret')) {
+			$args['reset_secret'] = true;
+		}
+		$flags = 0;
+		foreach ($request->getIntArray('flags') as $flag) {
+			$flags |= $flag;
+		}
+		if ($app['flags'] != $flags) {
+			$args['flags'] = $flags;
+		}
+		$uris = array_map('trim', explode(
+			"\n", $request->getText('redirect_uris')
+		));
+		if ($app['redirect_uris'] != $uris) {
+			$args['redirect_uris'] = $uris;
+		}
+		return SOA2Apps::adminUpdate( $app['client_id'], $args );
+	}
 }

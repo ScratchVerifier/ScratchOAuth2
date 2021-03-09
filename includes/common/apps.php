@@ -107,6 +107,11 @@ class SOA2Apps {
 			$set['client_secret'] = $client_secret;
 		}
 		if (
+			array_key_exists('flags', $args)
+			&& intval($app->flags) != $args['flags']
+		) {
+			$set['flags'] = $args['flags'];
+		} else if (
 			array_key_exists('app_name', $args)
 			&& $app->app_name != $args['app_name']
 		) {
@@ -126,6 +131,30 @@ class SOA2Apps {
 				SOA2DB::storeRedirectURIs( $client_id, $redirect_uris );
 		}
 		return self::application( $client_id, $owner_id );
+	}
+	/**
+	 * Update an application as an admin.
+	 * @param int $client_id the application ID to update
+	 * @param bool $args['reset_secret'] if set and true, resets the secret
+	 * @param int $args['flags'] if set, directly updates flags
+	 * @param array|null $args['redirect_uris'] if set, replaces the original list
+	 */
+	public static function adminUpdate( int $client_id, array $args ) {
+		$app = SOA2DB::getApplication( $client_id, null, false );
+		if (!$app) return null;
+		$res = self::update(
+			$client_id,
+			intval($app->owner_id),
+			array_filter($args, function ($k) {
+				return (
+					$k == 'reset_secret'
+					|| $k == 'redirect_uris'
+					|| $k == 'flags'
+				);
+			}, ARRAY_FILTER_USE_KEY)
+		);
+		$res['owner_id'] = intval($app->owner_id);
+		return $res;
 	}
 	/**
 	 * Delete an application
