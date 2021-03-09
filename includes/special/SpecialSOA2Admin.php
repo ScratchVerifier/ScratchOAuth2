@@ -74,7 +74,12 @@ class SpecialSOA2Admin extends SpecialPage {
 	}
 	public function apps( array $path ) {
 		$out = $this->getOutput();
-		$username = $this->getRequest()->getVal('username', $path[0]);
+		if ($username = $this->getRequest()->getVal('username')) {
+			$out->redirect(
+				$this->getPageTitle( 'apps/' . $username )->getLinkURL(), 303);
+				return;
+		}
+		$username = $path[0];
 		$user_id = SOA2Users::getID( $username ?: '' );
 		if ($user_id) {
 			$out->addReturnTo($this->getPageTitle( 'apps' ));
@@ -89,6 +94,11 @@ class SpecialSOA2Admin extends SpecialPage {
 			}
 			$out->addHTML(Html::closeElement('ul'));
 		} else {
+			if (count($path) > 0) {
+				$out->redirect(
+					$this->getPageTitle( 'apps' )->getLinkURL(), 303);
+				return;
+			}
 			$out->addReturnTo($this->getPageTitle());
 			$out->setPageTitle( wfMessage('soa2-admin-apps-title')->escaped() );
 			$out->addHTML(Html::openElement('form', [ 'method' => 'GET' ]));
