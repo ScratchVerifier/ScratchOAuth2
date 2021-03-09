@@ -47,6 +47,26 @@ class SOA2Apps {
 		return $arr;
 	}
 	/**
+	 * Get an array of partial application objects in need of name reviewing
+	 */
+	public static function needsNameApproval( int $maxRows ) {
+		$arr = [];
+		$rows = SOA2DB::getAppsNeedingNameApproval( $maxRows );
+		while ($row = $rows->fetchObject()) $arr[] = [
+			'client_id' => intval($row->client_id),
+			'app_name' => $row->app_name,
+			'owner_name' => $row->owner_name
+		];
+		return $arr;
+	}
+	/**
+	 * Approve the names of a list of applications
+	 * @param array<int> $client_ids the application IDs to approve
+	 */
+	public static function approveNames( array $client_ids ) {
+		SOA2DB::approveAppNames( $client_ids );
+	}
+	/**
 	 * Get a full application object
 	 * @param int $client_id the ID of the app
 	 * @param int|null $owner_id the owner of the app, to guard perms

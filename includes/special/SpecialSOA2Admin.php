@@ -12,6 +12,17 @@ use MediaWiki\Extension\ScratchOAuth2\Common\AppFlags;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Apps;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Users;
 
+function makeProfileLink($username) {
+	return Html::element(
+		'a',
+		[
+			'href' => sprintf(SOA2_PROFILE_URL, $username),
+			'target' => '_new'
+		],
+		$username
+	);
+}
+
 class SpecialSOA2Admin extends SpecialPage {
 	public function __construct() {
 		parent::__construct( 'SOA2Admin' );
@@ -98,15 +109,8 @@ class SpecialSOA2Admin extends SpecialPage {
 				'th', [],
 				wfMessage('soa2-app-owner')->text()
 			));
-			$username = SOA2Users::getName($app['owner_id']);
-			$out->addHTML(Html::rawElement('td', [], Html::element(
-				'a',
-				[
-					'href' => sprintf(SOA2_PROFILE_URL, $username),
-					'target' => '_new'
-				],
-				$username
-			)));
+			$out->addHTML(Html::rawElement(
+				'td', [], makeProfileLink(SOA2Users::getName($app['owner_id']))));
 		$out->addHTML(Html::closeElement('tr'));
 		$out->addHTML(Html::closeElement('table'));
 		$out->addHTML(Html::rawElement('p', [], Html::check(
@@ -155,7 +159,7 @@ class SpecialSOA2Admin extends SpecialPage {
 			$args['reset_secret'] = true;
 		}
 		$flags = 0;
-		foreach ($request->getIntArray('flags') as $flag) {
+		foreach ($request->getIntArray('flags', []) as $flag) {
 			$flags |= $flag;
 		}
 		if ($app['flags'] != $flags) {
@@ -168,5 +172,47 @@ class SpecialSOA2Admin extends SpecialPage {
 			$args['redirect_uris'] = $uris;
 		}
 		return SOA2Apps::adminUpdate( $app['client_id'], $args );
+	}
+	public function approvals( array $path ) {
+		$request = $this->getRequest();
+		if ($request->wasPosted()) {
+			SOA2Apps::approveNames($request->getIntArray('client_ids', []));
+		}
+		$apps = SOA2Apps::needsNameApproval(20);
+		$out = $this->getOutput();
+		$out->setPageTitle( wfMessage('soa2-admin-approvals')->escaped() );
+		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
+		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable mw-sortable' ]));
+		$out->addHTML(Html::openElement('tr'));
+		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-name')->text()));
+		$out->addHTML(Html::element('th', [], wfMessage('soa2-app-owner')->text()));
+		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-check')->text()));
+		$out->addHTML(Html::closeElement('tr'));
+		foreach ($apps as $app) {
+			$out->addHTML(Html::openElement('tr'));
+			$app_name = $app['app_name'];
+			$client_id = $app['client_id'];
+			$out->addHTML(Html::rawElement('td', [], Html::element(
+				'a',
+				[
+					'href' => $this->getPageTitle( 'app/' . $client_id )->getLinkURL(),
+					'target' => '_new',
+				],
+				htmlspecialchars($app['app_name'])
+			)));
+			$out->addHTML(Html::rawElement('td', [], makeProfileLink($app['owner_name'])));
+			$out->addHTML(Html::rawElement('td', [], Html::check(
+				'client_ids[]', false,
+				[ 'value' => $client_id, 'id' => "soa2-app-$client_id-approval-input" ]
+			)));
+			$out->addHTML(Html::closeElement('tr'));
+		}
+		$out->addHTML(Html::closeElement('table'));
+		$out->addHTML(Html::rawElement('p', [], Html::input(
+			'save',
+			wfMessage('soa2-admin-approvals-submit')->text(),
+			'submit'
+		)));
+		$out->addHTML(Html::closeElement('form'));
 	}
 }
