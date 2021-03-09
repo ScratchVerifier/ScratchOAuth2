@@ -187,7 +187,7 @@ class SpecialSOA2Admin extends SpecialPage {
 		$out->setPageTitle( wfMessage('soa2-admin-approvals')->escaped() );
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
-			$request()->getSession()->getToken()->toString()));
+			$request->getSession()->getToken()->toString()));
 		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable mw-sortable' ]));
 		$out->addHTML(Html::openElement('tr'));
 		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-name')->text()));
