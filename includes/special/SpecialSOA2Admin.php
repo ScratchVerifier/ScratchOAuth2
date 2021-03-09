@@ -175,13 +175,19 @@ class SpecialSOA2Admin extends SpecialPage {
 	}
 	public function approvals( array $path ) {
 		$request = $this->getRequest();
+		$out = $this->getOutput();
 		if ($request->wasPosted()) {
-			SOA2Apps::approveNames($request->getIntArray('client_ids', []));
+			if (!$request->getSession()->getToken()->match($request->getVal('token'))) {
+				$out->addWikiMsg( 'sessionfailure' );
+			} else {
+				SOA2Apps::approveNames($request->getIntArray('client_ids', []));
+			}
 		}
 		$apps = SOA2Apps::needsNameApproval(20);
-		$out = $this->getOutput();
 		$out->setPageTitle( wfMessage('soa2-admin-approvals')->escaped() );
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
+		$out->addHTML(Html::hidden('token',
+			$request()->getSession()->getToken()->toString()));
 		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable mw-sortable' ]));
 		$out->addHTML(Html::openElement('tr'));
 		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-name')->text()));
