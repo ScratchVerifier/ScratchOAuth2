@@ -62,6 +62,14 @@ class SpecialSOA2Admin extends SpecialPage {
 				break;
 			default:
 				$out->setPageTitle( 'SOA2Admin' );
+				$out->addHTML(Html::rawElement('p', [], Html::element(
+					'a', [ 'href' => $this->getPageTitle( 'apps' )->getLinkURL() ],
+					wfMessage('soa2-admin-apps-title')->text()
+				)));
+				$out->addHTML(Html::rawElement('p', [], Html::element(
+					'a', [ 'href' => $this->getPageTitle( 'approvals' )->getLinkURL() ],
+					wfMessage('soa2-admin-approvals')->text()
+				)));
 		}
 	}
 	public function apps( array $path ) {
