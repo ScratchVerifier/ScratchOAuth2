@@ -14,6 +14,10 @@ class SOA2Users {
 		$user = SOA2DB::getUserById( $user_id );
 		return $user ? $user->user_name : null;
 	}
+	public static function getID( string $user_name ) {
+		$user = SOA2DB::getUserByName( $user_name );
+		return $user ? intval($user->user_id) : null;
+	}
 	/**
 	 * Get a user by their access token
 	 * @param string $access_token the access token
