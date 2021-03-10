@@ -5,6 +5,7 @@ require_once dirname(__DIR__) . "/common/consts.php";
 require_once dirname(__DIR__) . "/common/login.php";
 require_once dirname(__DIR__) . "/common/apps.php";
 require_once dirname(__DIR__) . "/common/auth.php";
+require_once dirname(__DIR__) . "/common/users.php";
 
 use SpecialPage;
 use WebRequest;
@@ -13,6 +14,7 @@ use Title;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Login;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Apps;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Auth;
+use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Users;
 use MediaWiki\Extension\ScratchOAuth2\Common\AppFlags;
 
 class SpecialScratchOAuth2 extends SpecialPage {
@@ -192,7 +194,15 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			$check = '';
 		}
 		$out->setPageTitle( wfMessage('soa2-auth-title', $name, $check)->parse() );
-		$out->addWikiMsg('soa2-auth-desc', htmlspecialchars($name));
+		if ($app['flags'] & AppFlags::HIDE_OWNER) {
+			$out->addWikiMsg('soa2-auth-desc-no-owner', htmlspecialchars($name));
+		} else {
+			$out->addWikiMsg(
+				'soa2-auth-desc',
+				htmlspecialchars($name),
+				SOA2Users::getName($data['owner_id'])
+			);
+		}
 		$out->addHTML(Html::openElement('ul'));
 		foreach ($data['scopes'] as $scope) {
 			$out->addHTML(Html::element(
