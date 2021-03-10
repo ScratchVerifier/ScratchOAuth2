@@ -60,5 +60,7 @@
 	"soa2-admin-approvals-submit": "Text of submit button for approvals",
 	"soa2-admin-apps-title": "Title of Special:SOA2Admin/apps",
 	"soa2-admin-apps-namedtitle": "Title of Special:SOA2Admin/apps/$1",
-	"soa2-admin-apps-submit": "Text of submit button for username"
+	"soa2-admin-apps-submit": "Text of submit button for username",
+	"soa2-admins-list-title": "Title of Special:ScratchOAuth2/admins",
+	"soa2-admins-list": "Description of us"
 }

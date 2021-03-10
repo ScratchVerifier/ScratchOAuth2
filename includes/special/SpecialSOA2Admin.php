@@ -12,23 +12,13 @@ use MediaWiki\Extension\ScratchOAuth2\Common\AppFlags;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Apps;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Users;
 
-function makeProfileLink($username) {
-	return Html::element(
-		'a',
-		[
-			'href' => sprintf(SOA2_PROFILE_URL, $username),
-			'target' => '_new'
-		],
-		$username
-	);
-}
-
 class SpecialSOA2Admin extends SpecialPage {
 	public function __construct() {
 		parent::__construct( 'SOA2Admin' );
 	}
 
 	public function execute( $par ) {
+		global $wgSOA2AdminUsers;
 		$this->checkReadOnly();
 		$out = $this->getOutput();
 		$out->setIndexPolicy( 'noindex' );
@@ -42,8 +32,7 @@ class SpecialSOA2Admin extends SpecialPage {
 			);
 			return;
 		}
-		// temp until config
-		if ($user_id != 10114764 && $user_id != 35751470 && $user_id != 62962013) {
+		if (!in_array($user_id, $wgSOA2AdminUsers)) {
 			$out->showErrorPage('soa2-not-admin-title', 'soa2-not-admin');
 			return;
 		}
@@ -155,7 +144,8 @@ class SpecialSOA2Admin extends SpecialPage {
 				'th', [],
 				wfMessage('soa2-app-owner')->text()
 			));
-			$out->addHTML(Html::rawElement('td', [], makeProfileLink($owner)));
+			$out->addHTML(Html::rawElement(
+				'td', [], SOA2Users::makeProfileLink( $owner )));
 		$out->addHTML(Html::closeElement('tr'));
 		$out->addHTML(Html::closeElement('table'));
 		$out->addHTML(Html::rawElement('p', [], Html::check(
@@ -251,7 +241,8 @@ class SpecialSOA2Admin extends SpecialPage {
 				],
 				htmlspecialchars($app['app_name'])
 			)));
-			$out->addHTML(Html::rawElement('td', [], makeProfileLink($app['owner_name'])));
+			$out->addHTML(Html::rawElement(
+				'td', [], SOA2Users::makeProfileLink( $app['owner_name'] )));
 			$out->addHTML(Html::rawElement('td', [], Html::check(
 				'client_ids[]', false,
 				[ 'value' => $client_id, 'id' => "soa2-app-$client_id-approval-input" ]

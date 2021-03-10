@@ -54,5 +54,10 @@
 			"class": "MediaWiki\\Extension\\ScratchOAuth2\\Api\\User"
 		}
 	],
+	"config": {
+		"SOA2AdminUsers": {
+			"value": []
+		}
+	},
 	"manifest_version": 2
 }

@@ -4,11 +4,28 @@ namespace MediaWiki\Extension\ScratchOAuth2\Common;
 require_once __DIR__ . "/db.php";
 require_once __DIR__ . "/tokens.php";
 
+use Html;
+
 class SOA2Users {
+	/**
+	 * Make a profile <a> from a username.
+	 * @param string $username the username
+	 * @return string the link
+	 */
+	public static function makeProfileLink($username) {
+		return Html::element(
+			'a',
+			[
+				'href' => sprintf(SOA2_PROFILE_URL, $username),
+				'target' => '_new'
+			],
+			$username
+		);
+	}
 	/**
 	 * Get a username by ID
 	 * @param int $user_id the user ID
-	 * @return ?string the username, or null if not found
+	 * @return string|null the username, or null if not found
 	 */
 	public static function getName( int $user_id ) {
 		$user = SOA2DB::getUserById( $user_id );

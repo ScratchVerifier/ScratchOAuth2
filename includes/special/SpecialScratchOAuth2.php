@@ -33,8 +33,12 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			case 'authorize':
 				$this->specialAuth();
 				break;
+			case 'admins':
+				$this->showAdmins();
+				break;
 			default:
-				$out->setPageTitle( 'ScratchOAuth2' );
+				$out->redirect( $this->getPageTitle( 'login' )->getLinkURL(), 303 );
+				/*$out->setPageTitle( 'ScratchOAuth2' );
 				$user_id = SOA2Apps::userID();
 				$out->addHTML(
 					"<p>Your Scratch user ID is "
@@ -45,7 +49,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 					$out->addHTML(Html::element('pre', [], var_export(
 						SOA2Auth::get( $this->getRequest()->getSessionData('soa2_authing') ), true
 					)));
-				}
+				}*/
 		}
 	}
 
@@ -268,5 +272,20 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		], null, '&', PHP_QUERY_RFC3986);
 		$uri .= (parse_url($uri, PHP_URL_QUERY) ? '&' : '?') . $query;
 		$out->redirect($uri, 303);
+	}
+
+	public function showAdmins() {
+		global $wgSOA2AdminUsers;
+		$out = $this->getOutput();
+		$out->setPageTitle( wfMessage('soa2-admins-list-title')->escaped() );
+		$out->addWikiMsg('soa2-admins-list');
+		$out->addHTML(Html::openElement('ul'));
+		foreach ($wgSOA2AdminUsers as $user_id) {
+			$user_name = SOA2Users::getName( $user_id );
+			if (!$user_name) continue;
+			$out->addHTML(Html::rawElement(
+				'li', [], SOA2Users::makeProfileLink( $user_name )));
+		}
+		$out->addHTML(Html::closeElement('ul'));
 	}
 }
