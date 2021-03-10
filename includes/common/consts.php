@@ -19,4 +19,5 @@ define('SOA2_CODE_EXPIRY', 30*60);
 class AppFlags {
 	public const NAME_APPROVED = 1;
 	public const VERIFIED = 2;
+	public const HIDE_OWNER = 4;
 }
