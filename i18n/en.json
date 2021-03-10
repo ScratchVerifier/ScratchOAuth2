@@ -26,9 +26,9 @@
 	"soa2-flags-NAME_APPROVED": "Name moderated and approved?",
 	"soa2-flags-not-NAME_APPROVED": "Avoid releasing your app to the public until approved",
 	"soa2-flags-VERIFIED": "Verified?",
-	"soa2-flags-not-VERIFIED": "If your app is widely used, contact [https://scratch.mit.edu/users/kenny2scratch/ Kenny2scratch] or [https://scratch.mit.edu/users/smileycreations15/ Semisol] to request verification",
+	"soa2-flags-not-VERIFIED": "If your app is widely used, contact [[Special:ScratchOAuth2/admins|the admins]] to request verification",
 	"soa2-flags-HIDE_OWNER": "Owner username hidden when authorizing?",
-	"soa2-flags-not-HIDE_OWNER": "If your involvement in your app needs to be anonymous, contact [https://scratch.mit.edu/users/kenny2scratch/ Kenny2scratch] or [https://scratch.mit.edu/users/smileycreations15/ Semisol] to request this flag",
+	"soa2-flags-not-HIDE_OWNER": "If your involvement in your app needs to be anonymous, contact [[Special:ScratchOAuth2/admins|the admins]] to request this flag",
 	"soa2-app-uris": "Redirect URIs:",
 	"soa2-app-save": "Save",
 	"soa2-app-delete": "Delete $1",
@@ -60,5 +60,7 @@
 	"soa2-admin-approvals-submit": "Approve Checked",
 	"soa2-admin-apps-title": "Manage apps",
 	"soa2-admin-apps-namedtitle": "Manage apps for $1",
-	"soa2-admin-apps-submit": "Get apps for this username"
+	"soa2-admin-apps-submit": "Get apps for this username",
+	"soa2-admins-list-title": "ScratchOAuth2 Admins",
+	"soa2-admins-list": "These users are responsible for maintaining ScratchOAuth2, moderating app names, and handling flag requests:"
 }
