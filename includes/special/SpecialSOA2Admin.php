@@ -220,6 +220,7 @@ class SpecialSOA2Admin extends SpecialPage {
 		}
 		$apps = SOA2Apps::needsNameApproval(20);
 		$out->setPageTitle( wfMessage('soa2-admin-approvals')->escaped() );
+		$out->addReturnTo($this->getPageTitle());
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
 			$request->getSession()->getToken()->toString()));
