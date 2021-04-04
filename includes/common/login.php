@@ -12,7 +12,8 @@ class SOA2Login {
 	 */
 	public static function gen_code( $session ) {
 		if (!$session->exists( 'soa2_scratch_code' )) {
-			$code = strtr(hash('sha256', random_bytes(32)), '0123456789', 'ABCDEFGHIJ');
+			$code = chunk_split(hash('sha256', random_bytes(32)), 5, ':');
+			$code = substr($code, 0, strlen($code) - 1); // chop off last colon
 			$session->set( 'soa2_scratch_code', $code );
 			$session->save();
 		}
