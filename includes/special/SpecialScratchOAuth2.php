@@ -37,10 +37,14 @@ class SpecialScratchOAuth2 extends SpecialPage {
 				$this->showAdmins();
 				break;
 			default:
-				$out->redirect( $this->getPageTitle( 'login' )->getLinkURL(), 303 );
-				/*$out->setPageTitle( 'ScratchOAuth2' );
+				$out->setPageTitle( 'ScratchOAuth2' );
 				$user_id = SOA2Apps::userID();
-				$out->addHTML(
+				if (!$user_id) {
+					$out->redirect( $this->getPageTitle( 'login' )->getLinkURL(), 303 );
+					return;
+				}
+				$out->addWikiMsg('soa2-login-success');
+				/*$out->addHTML(
 					"<p>Your Scratch user ID is "
 					. ($user_id ?: 'not set')
 					. "</p>"
