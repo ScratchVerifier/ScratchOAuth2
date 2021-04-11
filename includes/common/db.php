@@ -154,6 +154,10 @@ class SOA2DB {
 	) {
 		$dbw = self::dbw();
 		$dbw->delete(
+			'soa2_access_tokens',
+			['client_id' => $client_id, 'user_id' => $user_id]
+		);
+		$dbw->delete(
 			'soa2_refresh_tokens',
 			['client_id' => $client_id, 'user_id' => $user_id]
 		);
