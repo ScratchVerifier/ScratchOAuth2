@@ -69,7 +69,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			$username = $request->getVal( 'username', '', );
 			if (!preg_match(SOA2_USERNAME_REGEX, $username)) {
 				$this->specialLogin(
-					wfMessage('soa2-invalid-username', $username)->plain()
+					wfMessage('soa2-invalid-username')->plaintextParams($username)->parse()
 				);
 				return;
 			}
@@ -117,7 +117,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		// Step 16
 		$out->addHTML(Html::rawElement(
 			'p', [],
-			wfMessage('soa2-vercode-explanation', $profile)->plain()
+			wfMessage('soa2-vercode-explanation')->rawParams($profile)->parse()
 		));
 		$out->addHTML(Html::rawElement('p', [], Html::element(
 			'code', [], $codes['code']
@@ -135,7 +135,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		);
 		if (!$success) {
 			$this->specialLogin(
-				wfMessage('soa2-login-failed')->plain()
+				wfMessage('soa2-login-failed')->parse()
 			);
 			return;
 		}
@@ -235,7 +235,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		$request = $this->getRequest();
 		$session = $request->getSession();
 		if (!$session->getToken()->match($request->getVal('token'))) {
-			$this->specialAuth( wfMessage('sessionfailure')->text() );
+			$this->specialAuth( wfMessage('sessionfailure')->parse() );
 			return;
 		}
 		$out = $this->getOutput();
@@ -261,7 +261,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		) {
 			SOA2Auth::cancel( $user_id );
 			$session->remove('soa2_authing');
-			$this->specialAuth( wfMessage('soa2-auth-maybe-invalid')->text() );
+			$this->specialAuth( wfMessage('soa2-auth-maybe-invalid')->parse() );
 			return;
 		}
 		// Step 31

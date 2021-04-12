@@ -52,7 +52,7 @@ class SOA2Login {
 		$matches = [];
 		preg_match_all(SOA2_COMMENTS_REGEX, $comments, $matches, PREG_PATTERN_ORDER);
 		for ($i = 0; $i < count($matches[0]); ++$i) {
-			if (strtolower($matches[1][$i]) != $username) continue;
+			if (strtolower($matches[1][$i]) !== $username) continue;
 			if (hash_equals($code, $matches[2][$i])) return true; // Step 22
 		}
 		return false;
