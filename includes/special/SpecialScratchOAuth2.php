@@ -69,7 +69,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			$username = $request->getVal( 'username', '', );
 			if (!preg_match(SOA2_USERNAME_REGEX, $username)) {
 				$this->specialLogin(
-					wfMessage('soa2-invalid-username', $username)->plain()
+					wfMessage('soa2-invalid-username')->plaintextParams($username)->parse()
 				);
 				return;
 			}
