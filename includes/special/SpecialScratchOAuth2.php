@@ -117,7 +117,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		// Step 16
 		$out->addHTML(Html::rawElement(
 			'p', [],
-			wfMessage('soa2-vercode-explanation')->rawParams($profile)->escaped()
+			wfMessage('soa2-vercode-explanation')->rawParams($profile)->parse()
 		));
 		$out->addHTML(Html::rawElement('p', [], Html::element(
 			'code', [], $codes['code']
@@ -135,7 +135,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		);
 		if (!$success) {
 			$this->specialLogin(
-				wfMessage('soa2-login-failed')->escaped()
+				wfMessage('soa2-login-failed')->parse()
 			);
 			return;
 		}
@@ -235,7 +235,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		$request = $this->getRequest();
 		$session = $request->getSession();
 		if (!$session->getToken()->match($request->getVal('token'))) {
-			$this->specialAuth( wfMessage('sessionfailure')->escaped() );
+			$this->specialAuth( wfMessage('sessionfailure')->parse() );
 			return;
 		}
 		$out = $this->getOutput();
@@ -261,7 +261,7 @@ class SpecialScratchOAuth2 extends SpecialPage {
 		) {
 			SOA2Auth::cancel( $user_id );
 			$session->remove('soa2_authing');
-			$this->specialAuth( wfMessage('soa2-auth-maybe-invalid')->escaped() );
+			$this->specialAuth( wfMessage('soa2-auth-maybe-invalid')->parse() );
 			return;
 		}
 		// Step 31

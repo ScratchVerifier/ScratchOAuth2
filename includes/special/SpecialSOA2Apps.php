@@ -255,7 +255,7 @@ EOS);
 	public function createApp( int $owner_id ) {
 		$request = $this->getRequest();
 		if (!$request->getSession()->getToken()->match($request->getVal('token'))) {
-			$this->newApp( $owner_id, wfMessage('sessionfailure')->escaped());
+			$this->newApp( $owner_id, wfMessage('sessionfailure')->parse());
 			return;
 		}
 		$app_name = trim($request->getVal('app_name')) ?: null;
