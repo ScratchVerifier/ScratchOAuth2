@@ -38,6 +38,8 @@ class SpecificApps extends SimpleHandler {
 		$data = $this->getRequest()->getBody()->getContents();
 		$data = json_decode($data, true);
 		if (!$data) return $this->http400();
+		// Users may not modify flags, thus 403
+		if (array_key_exists('flags', $data)) return $this->getResponseFactory()->createHttpError(403);
 		if (
 			array_key_exists('reset_secret', $data)
 			&& !is_bool($data['reset_secret'])
