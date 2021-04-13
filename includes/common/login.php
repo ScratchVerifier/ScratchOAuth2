@@ -14,6 +14,7 @@ class SOA2Login {
 		if (!$session->exists( 'soa2_scratch_code' )) {
 			$code = chunk_split(hash('sha256', random_bytes(32)), 5, ':');
 			$code = substr($code, 0, strlen($code) - 1); // chop off last colon
+			$code = wfMessage('soa2-vercode', $code)->text();
 			$session->set( 'soa2_scratch_code', $code );
 			$session->save();
 		}

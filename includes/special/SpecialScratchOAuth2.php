@@ -120,8 +120,9 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			wfMessage('soa2-vercode-explanation')->rawParams($profile)->parse()
 		));
 		$out->addHTML(Html::rawElement('p', [], Html::element(
-			'code', [], $codes['code']
+			'textarea', [], $codes['code']
 		)));
+		$out->addWikiMsg('soa2-vercode-explanation2');
 		$out->addHTML(Html::rawElement('p', [], Html::submitButton(
 			wfMessage('soa2-login')->plain(), []
 		)));
