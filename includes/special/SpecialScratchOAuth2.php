@@ -120,13 +120,40 @@ class SpecialScratchOAuth2 extends SpecialPage {
 			wfMessage('soa2-vercode-explanation')->rawParams($profile)->parse()
 		));
 		$out->addHTML(Html::rawElement('p', [], Html::element(
-			'textarea', [], $codes['code']
+			'textarea', [
+				'id' => 'soa2-vercode-textarea',
+				'style' => 'height: 5em'
+			], $codes['code']
 		)));
 		$out->addWikiMsg('soa2-vercode-explanation2');
 		$out->addHTML(Html::rawElement('p', [], Html::submitButton(
 			wfMessage('soa2-login')->plain(), []
+		) . ' ' . Html::input(
+			null, wfMessage('soa2-copy-button')->text(),
+			'button',
+			[
+				'id' => 'soa2-copy-button'
+			]
 		)));
 		$out->addHTML(Html::closeElement('form'));
+		$success = json_encode(wfMessage('soa2-copy-success')->text());
+		$failure = json_encode(wfMessage('soa2-copy-failure')->text());
+		$out->addHTML(Html::inlineScript(<<<EOS
+document.getElementById('soa2-copy-button').onclick = function (e) {
+	e.preventDefault();
+	var textarea = document.getElementById('soa2-vercode-textarea');
+	textarea.focus(); textarea.select();
+	var succ = $success, fail = $failure;
+	var success;
+	try {
+		success = document.execCommand('copy');
+	} catch (err) {
+		success = false;
+	}
+	if (success) mw.notify(succ);
+	else mw.notify(fail);
+};
+EOS));
 	}
 
 	public function doLogin( WebRequest $request ) { // Step 18
