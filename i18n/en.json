@@ -8,7 +8,7 @@
 	"soa2-invalid-username": "Invalid username: $1",
 	"soa2-vercode-explanation": "Please go to $1 and comment the code below:",
 	"soa2-vercode-explanation2": "For added privacy, delete your comment immediately after logging in here.",
-	"soa2-vercode": "Copy this paragraph (including both the code and this message). Only post this code if it came from {{SERVER}} | $1",
+	"soa2-vercode": "Copy this paragraph (including both the code and this message). Only post this code if it came from {{SERVERNAME}} | $1",
 	"soa2-copy-button": "Copy code",
 	"soa2-copy-success": "Copied code.",
 	"soa2-copy-failure": "Failed to copy code.",
