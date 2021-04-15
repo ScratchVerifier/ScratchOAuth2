@@ -57,6 +57,24 @@
 	"config": {
 		"SOA2AdminUsers": {
 			"value": []
+		},
+		"SOA2DBtype": {
+			"value": null
+		},
+		"SOA2DBserver": {
+			"value": "localhost"
+		},
+		"SOA2DBuser": {
+			"value": null
+		},
+		"SOA2DBpassword": {
+			"value": null
+		},
+		"SOA2DBname": {
+			"value": null
+		},
+		"SOA2DBprefix": {
+			"value": ""
 		}
 	},
 	"manifest_version": 2

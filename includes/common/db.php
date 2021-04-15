@@ -2,12 +2,41 @@
 
 namespace MediaWiki\Extension\ScratchOAuth2\Common;
 
+use Database;
+
 class SOA2DB {
+	protected static $dbw;
+	protected static $dbr;
+
 	public static function dbw() {
-		return wfGetDB( DB_MASTER );
+		if (!isset(self::$dbw)) {
+			$func = self::dbFactory();
+			self::$dbw = $func( DB_MASTER );
+		}
+		return self::$dbw;
 	}
 	public static function dbr() {
-		return wfGetDB( DB_REPLICA );
+		if (!isset(self::$dbr)) {
+			$func = self::dbFactory();
+			self::$dbr = $func( DB_REPLICA );
+		}
+		return self::$dbr;
+	}
+	protected static function dbFactory() {
+		global $wgSOA2DBtype, $wgSOA2DBserver, $wgSOA2DBuser, $wgSOA2DBpassword, $wgSOA2DBname, $wgSOA2DBprefix;
+		if (!$wgSOA2DBtype) return wfGetDB;
+		$type = $wgSOA2DBtype;
+		$params = [
+			'host' => $wgSOA2DBserver,
+			'user' => $wgSOA2DBuser,
+			'password' => $wgSOA2DBpassword,
+			'dbname' => $wgSOA2DBname,
+			'flags' => DBO_DEFAULT,
+			'tablePrefix' => $wgSOA2DBprefix
+		];
+		return static function ( $index ) use ( $type, $params ) {
+			return Database::factory( $type, $params );
+		};
 	}
 	// login methods
 	public static function saveUser( int $user_id, string $username ) {
