@@ -48,6 +48,7 @@ class SOA2Apps {
 	}
 	/**
 	 * Get an array of partial application objects in need of name reviewing
+	 * @param int $maxRows maximum number of rows to return
 	 */
 	public static function needsNameApproval( int $maxRows ) {
 		$arr = [];
@@ -57,6 +58,25 @@ class SOA2Apps {
 			'app_name' => $row->app_name,
 			'owner_name' => $row->owner_name
 		];
+		return $arr;
+	}
+	/**
+	 * Get an array of partial application objects
+	 * @param int $maxRows maximum number of rows to return
+	 * @param int? $start skip to this client ID
+	 * @param int? $end see until at most this client ID
+	 */
+	public static function paginated(
+		int $maxRows, ?int $start = null, ?int $end = null
+	) {
+		$arr = [];
+		$rows = SOA2DB::getApplications( $maxRows, $start, $end );
+		while ($row = $rows->fetchObject()) $arr[] = [
+			'client_id' => intval($row->client_id),
+			'app_name' => $row->app_name,
+			'owner_name' => $row->owner_name
+		];
+		if ($end !== null) $arr = array_reverse($arr);
 		return $arr;
 	}
 	/**

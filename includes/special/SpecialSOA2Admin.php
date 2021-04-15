@@ -98,6 +98,31 @@ class SpecialSOA2Admin extends SpecialPage {
 				wfMessage('soa2-admin-apps-submit')->escaped(), []
 			)));
 			$out->addHTML(Html::closeElement('form'));
+			// table of all apps
+			$request = $this->getRequest();
+			$limit = $request->getInt('limit', 20);
+			$start = $request->getIntOrNull('start');
+			$end = $request->getIntOrNull('end');
+			$apps = SOA2Apps::paginated( $limit, $start, $end );
+			$this->appListTable(
+				$apps, false, wfMessage('soa2-admin-all-apps-title')->text()
+			);
+			$nextLink = $this->getPageTitle( 'apps' )->getLinkURL([
+				'limit' => $limit, 'start' => $apps[count($apps)-1]['client_id']
+			]);
+			$nextLink = Html::element(
+				'a', ['href' => $nextLink],
+				wfMessage('soa2-next-text')->text()
+			);
+			$prevLink = $this->getPageTitle( 'apps' )->getLinkURL([
+				'limit' => $limit, 'end' => $apps[0]['client_id']
+			]);
+			$prevLink = Html::element(
+				'a', ['href' => $prevLink],
+				wfMessage('soa2-prev-text')->text()
+			);
+			$out->addHTML(wfMessage('soa2-admin-app-list-footer')
+				->rawParams($prevLink, $nextLink, $limit)->parse());
 		}
 	}
 	public function app( array $path ) {
@@ -224,11 +249,26 @@ class SpecialSOA2Admin extends SpecialPage {
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
 			$request->getSession()->getToken()->toString()));
+		$this->appListTable( $apps, true );
+		$out->addHTML(Html::rawElement('p', [], Html::input(
+			'save',
+			wfMessage('soa2-admin-approvals-submit')->text(),
+			'submit'
+		)));
+		$out->addHTML(Html::closeElement('form'));
+	}
+
+	public function appListTable( array $apps, bool $check = false, ?string $caption = null ) {
+		$out = $this->getOutput();
 		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable mw-sortable' ]));
+		if ($caption)
+			$out->addHTML(Html::element('caption', [], $caption));
 		$out->addHTML(Html::openElement('tr'));
 		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-name')->text()));
 		$out->addHTML(Html::element('th', [], wfMessage('soa2-app-owner')->text()));
-		$out->addHTML(Html::element('th', [], wfMessage('soa2-admin-approvals-check')->text()));
+		if ($check) $out->addHTML(Html::element(
+			'th', [], wfMessage('soa2-admin-approvals-check')->text()
+		));
 		$out->addHTML(Html::closeElement('tr'));
 		foreach ($apps as $app) {
 			$out->addHTML(Html::openElement('tr'));
@@ -240,22 +280,19 @@ class SpecialSOA2Admin extends SpecialPage {
 					'href' => $this->getPageTitle( 'app/' . $client_id )->getLinkURL(),
 					'target' => '_new',
 				],
-				htmlspecialchars($app['app_name'])
+				$app_name
 			)));
 			$out->addHTML(Html::rawElement(
-				'td', [], SOA2Users::makeProfileLink( $app['owner_name'] )));
-			$out->addHTML(Html::rawElement('td', [], Html::check(
-				'client_ids[]', false,
-				[ 'value' => $client_id, 'id' => "soa2-app-$client_id-approval-input" ]
-			)));
+				'td', [], SOA2Users::makeProfileLink( $app['owner_name'] )
+			));
+			if ($check) {
+				$out->addHTML(Html::rawElement('td', [], Html::check(
+					'client_ids[]', false,
+					[ 'value' => $client_id, 'id' => "soa2-app-$client_id-approval-input" ]
+				)));
+			}
 			$out->addHTML(Html::closeElement('tr'));
 		}
 		$out->addHTML(Html::closeElement('table'));
-		$out->addHTML(Html::rawElement('p', [], Html::input(
-			'save',
-			wfMessage('soa2-admin-approvals-submit')->text(),
-			'submit'
-		)));
-		$out->addHTML(Html::closeElement('form'));
 	}
 }

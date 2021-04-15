@@ -68,5 +68,9 @@
 	"soa2-admin-apps-namedtitle": "Title of Special:SOA2Admin/apps/$1",
 	"soa2-admin-apps-submit": "Text of submit button for username",
 	"soa2-admins-list-title": "Title of Special:ScratchOAuth2/admins",
-	"soa2-admins-list": "Description of us"
+	"soa2-admins-list": "Description of us",
+	"soa2-admin-all-apps-title": "Caption of all-applications list table",
+	"soa2-admin-app-list-footer": "Links to next ($1) or previous ($2) apps, at most $3",
+	"soa2-prev-text": "Link text for 'previous' link",
+	"soa2-next-text": "Link text for 'next' link"
 }

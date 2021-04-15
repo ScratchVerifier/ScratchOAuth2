@@ -68,5 +68,9 @@
 	"soa2-admin-apps-namedtitle": "Manage apps for $1",
 	"soa2-admin-apps-submit": "Get apps for this username",
 	"soa2-admins-list-title": "ScratchOAuth2 Admins",
-	"soa2-admins-list": "These users are responsible for maintaining ScratchOAuth2, moderating app names, and handling flag requests:"
+	"soa2-admins-list": "These users are responsible for maintaining ScratchOAuth2, moderating app names, and handling flag requests:",
+	"soa2-admin-all-apps-title": "All applications",
+	"soa2-admin-app-list-footer": "Show $1 | $2 $3 app(s) (if available; use browser back button if the table is empty)",
+	"soa2-prev-text": "previous",
+	"soa2-next-text": "next"
 }

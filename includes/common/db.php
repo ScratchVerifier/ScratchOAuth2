@@ -77,7 +77,27 @@ class SOA2DB {
 			['client_id', 'app_name', 'user_name AS owner_name'],
 			['flags&1=0'],
 			__METHOD__,
-			['LIMIT' => $maxRows],
+			['LIMIT' => $maxRows, 'ORDER BY' => ['owner_name', 'client_id']],
+			['soa2_scratchers' => ['LEFT JOIN', 'user_id=owner_id']]
+		);
+	}
+	public static function getApplications(
+		int $maxRows, ?int $start = null, ?int $end = null
+	) {
+		$where = '';
+		$order = 'client_id';
+		if ($start !== null) {
+			$where = "client_id>$start";
+		} else if ($end !== null) {
+			$where = "client_id<$end";
+			$order .= ' DESC';
+		}
+		return self::dbr()->select(
+			['soa2_applications', 'soa2_scratchers'],
+			['client_id', 'app_name', 'user_name AS owner_name'],
+			$where,
+			__METHOD__,
+			['LIMIT' => $maxRows, 'ORDER BY' => $order],
 			['soa2_scratchers' => ['LEFT JOIN', 'user_id=owner_id']]
 		);
 	}
