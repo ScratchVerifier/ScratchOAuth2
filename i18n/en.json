@@ -25,6 +25,7 @@
 	"soa2-app-secret": "Client\u00a0secret",
 	"soa2-app-name": "App name",
 	"soa2-app-owner": "Owner",
+	"soa2-app-created-at": "Created",
 	"soa2-app-reset": "Reset secret (check then click Save)",
 	"soa2-flags": "Flags",
 	"soa2-flags-yes": "Yes",

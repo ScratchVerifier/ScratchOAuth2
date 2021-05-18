@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\ScratchOAuth2\Special;
 require_once dirname(__DIR__) . "/common/consts.php";
 require_once dirname(__DIR__) . "/common/apps.php";
 require_once dirname(__DIR__) . "/common/users.php";
+require_once dirname(__DIR__) . "/common/pager.php";
 
 use SpecialPage;
 use Html;
@@ -11,6 +12,7 @@ use ReflectionClass;
 use MediaWiki\Extension\ScratchOAuth2\Common\AppFlags;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Apps;
 use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Users;
+use MediaWiki\Extension\ScratchOAuth2\Common\AppPager;
 
 class SpecialSOA2Admin extends SpecialPage {
 	public function __construct() {
@@ -99,30 +101,9 @@ class SpecialSOA2Admin extends SpecialPage {
 			)));
 			$out->addHTML(Html::closeElement('form'));
 			// table of all apps
-			$request = $this->getRequest();
-			$limit = $request->getInt('limit', 20);
-			$start = $request->getIntOrNull('start');
-			$end = $request->getIntOrNull('end');
-			$apps = SOA2Apps::paginated( $limit, $start, $end );
 			$this->appListTable(
-				$apps, false, wfMessage('soa2-admin-all-apps-title')->text()
+				false, wfMessage('soa2-admin-all-apps-title')->text()
 			);
-			$nextLink = $this->getPageTitle( 'apps' )->getLinkURL([
-				'limit' => $limit, 'start' => $apps[count($apps)-1]['client_id']
-			]);
-			$nextLink = Html::element(
-				'a', ['href' => $nextLink],
-				wfMessage('soa2-next-text')->text()
-			);
-			$prevLink = $this->getPageTitle( 'apps' )->getLinkURL([
-				'limit' => $limit, 'end' => $apps[0]['client_id']
-			]);
-			$prevLink = Html::element(
-				'a', ['href' => $prevLink],
-				wfMessage('soa2-prev-text')->text()
-			);
-			$out->addHTML(wfMessage('soa2-admin-app-list-footer')
-				->rawParams($prevLink, $nextLink, $limit)->parse());
 		}
 	}
 	public function app( array $path ) {
@@ -171,6 +152,16 @@ class SpecialSOA2Admin extends SpecialPage {
 			));
 			$out->addHTML(Html::rawElement(
 				'td', [], SOA2Users::makeProfileLink( $owner )));
+		$out->addHTML(Html::closeElement('tr'));
+		$out->addHTML(Html::openElement('tr'));
+			$out->addHTML(Html::element(
+				'th', [],
+				wfMessage('soa2-app-created-at')->text()
+			));
+			$out->addHTML(Html::rawElement(
+				'td', [],
+				wfTimestamp( TS_ISO_8601, $app['created_at'] )
+			));
 		$out->addHTML(Html::closeElement('tr'));
 		$out->addHTML(Html::closeElement('table'));
 		$out->addHTML(Html::rawElement('p', [], Html::check(
@@ -243,13 +234,12 @@ class SpecialSOA2Admin extends SpecialPage {
 				SOA2Apps::approveNames($request->getIntArray('client_ids', []));
 			}
 		}
-		$apps = SOA2Apps::needsNameApproval(20);
 		$out->setPageTitle( wfMessage('soa2-admin-approvals')->escaped() );
 		$out->addReturnTo($this->getPageTitle());
 		$out->addHTML(Html::openElement('form', [ 'method' => 'POST' ]));
 		$out->addHTML(Html::hidden('token',
 			$request->getSession()->getToken()->toString()));
-		$this->appListTable( $apps, true );
+		$this->appListTable( true );
 		$out->addHTML(Html::rawElement('p', [], Html::input(
 			'save',
 			wfMessage('soa2-admin-approvals-submit')->text(),
@@ -258,7 +248,8 @@ class SpecialSOA2Admin extends SpecialPage {
 		$out->addHTML(Html::closeElement('form'));
 	}
 
-	public function appListTable( array $apps, bool $check = false, ?string $caption = null ) {
+	public function appListTable( bool $check = false, ?string $caption = null ) {
+		$pager = new AppPager($check);
 		$out = $this->getOutput();
 		$out->addHTML(Html::openElement('table', [ 'class' => 'wikitable mw-sortable' ]));
 		if ($caption)
@@ -270,29 +261,8 @@ class SpecialSOA2Admin extends SpecialPage {
 			'th', [], wfMessage('soa2-admin-approvals-check')->text()
 		));
 		$out->addHTML(Html::closeElement('tr'));
-		foreach ($apps as $app) {
-			$out->addHTML(Html::openElement('tr'));
-			$app_name = $app['app_name'];
-			$client_id = $app['client_id'];
-			$out->addHTML(Html::rawElement('td', [], Html::element(
-				'a',
-				[
-					'href' => $this->getPageTitle( 'app/' . $client_id )->getLinkURL(),
-					'target' => '_new',
-				],
-				$app_name
-			)));
-			$out->addHTML(Html::rawElement(
-				'td', [], SOA2Users::makeProfileLink( $app['owner_name'] )
-			));
-			if ($check) {
-				$out->addHTML(Html::rawElement('td', [], Html::check(
-					'client_ids[]', false,
-					[ 'value' => $client_id, 'id' => "soa2-app-$client_id-approval-input" ]
-				)));
-			}
-			$out->addHTML(Html::closeElement('tr'));
-		}
+		$out->addHTML($pager->getBody());
 		$out->addHTML(Html::closeElement('table'));
+		$out->addHTML(Html::rawElement('p', [], $pager->getNavigationBar()));
 	}
 }

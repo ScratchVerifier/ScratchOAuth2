@@ -47,39 +47,6 @@ class SOA2Apps {
 		return $arr;
 	}
 	/**
-	 * Get an array of partial application objects in need of name reviewing
-	 * @param int $maxRows maximum number of rows to return
-	 */
-	public static function needsNameApproval( int $maxRows ) {
-		$arr = [];
-		$rows = SOA2DB::getAppsNeedingNameApproval( $maxRows );
-		while ($row = $rows->fetchObject()) $arr[] = [
-			'client_id' => intval($row->client_id),
-			'app_name' => $row->app_name,
-			'owner_name' => $row->owner_name
-		];
-		return $arr;
-	}
-	/**
-	 * Get an array of partial application objects
-	 * @param int $maxRows maximum number of rows to return
-	 * @param int? $start skip to this client ID
-	 * @param int? $end see until at most this client ID
-	 */
-	public static function paginated(
-		int $maxRows, ?int $start = null, ?int $end = null
-	) {
-		$arr = [];
-		$rows = SOA2DB::getApplications( $maxRows, $start, $end );
-		while ($row = $rows->fetchObject()) $arr[] = [
-			'client_id' => intval($row->client_id),
-			'app_name' => $row->app_name,
-			'owner_name' => $row->owner_name
-		];
-		if ($end !== null) $arr = array_reverse($arr);
-		return $arr;
-	}
-	/**
 	 * Approve the names of a list of applications
 	 * @param array<int> $client_ids the application IDs to approve
 	 */
@@ -97,6 +64,7 @@ class SOA2Apps {
 		$res = [
 			'client_id' => intval($app->client_id),
 			'client_secret' => $app->client_secret,
+			'created_at' => intval($app->created_at),
 			'app_name' => $app->app_name,
 			'flags' => intval($app->flags),
 			'redirect_uris' => $app->redirect_uris

@@ -25,6 +25,7 @@
 	"soa2-app-secret": "Table header for client secret (with nbsp to not wrap)",
 	"soa2-app-name": "Label for app name field",
 	"soa2-app-owner": "Label for owner username field",
+	"soa2-app-created-at": "Label for app creation timestamp",
 	"soa2-app-reset": "Label for reset-secret checkbox",
 	"soa2-flags": "Title of flags table",
 	"soa2-flags-yes": "Boolean true",

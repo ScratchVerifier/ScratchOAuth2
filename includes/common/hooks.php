@@ -30,6 +30,11 @@ class SOA2Hooks {
 			'soa2_access_tokens',
 			$sql_dir . '/access_tokens.sql'
 		);
+		$updater->addExtensionField(
+			'soa2_applications',
+			'created_at',
+			$sql_dir . '/applications_created_at.sql'
+		);
 		return true;
 	}
 }
