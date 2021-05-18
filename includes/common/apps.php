@@ -91,7 +91,7 @@ class SOA2Apps {
 			$client_id, $client_secret, $app_name,
 			$owner_id, $flags
 		);
-		$redirect_uris = $redirect_uris ? array_filter($redirect_uris) : null;
+		$redirect_uris = $redirect_uris ? array_unique(array_filter($redirect_uris)) : null;
 		if ($redirect_uris) {
 			// Step 4
 			SOA2DB::storeRedirectURIs( $client_id, $redirect_uris );
@@ -134,7 +134,7 @@ class SOA2Apps {
 		if (array_key_exists('redirect_uris', $args)) {
 			SOA2DB::deleteRedirectURIs( $client_id );
 			$redirect_uris = $args['redirect_uris']
-				? array_filter($args['redirect_uris']) : null;
+				? array_unique(array_filter($args['redirect_uris'])) : null;
 			if ($redirect_uris)
 				SOA2DB::storeRedirectURIs( $client_id, $redirect_uris );
 		}

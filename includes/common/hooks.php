@@ -35,6 +35,10 @@ class SOA2Hooks {
 			'created_at',
 			$sql_dir . '/applications_created_at.sql'
 		);
+		$updater->modifyExtensionTable(
+			'soa2_redirect_uris',
+			$sql_dir . '/redirect_uris_key.sql'
+		);
 		return true;
 	}
 }
