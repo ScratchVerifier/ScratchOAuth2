@@ -2,6 +2,7 @@
 namespace MediaWiki\Extension\ScratchOAuth2;
 
 use DatabaseUpdater;
+use MediaWiki\Extension\ScratchOAuth2\Common\SOA2Login;
 
 require_once __DIR__ . "/consts.php";
 require_once __DIR__ . "/login.php";
@@ -47,6 +48,13 @@ class SOA2Hooks {
 			'user_name_cased',
 			$sql_dir . '/cased_usernames.sql'
 		);
+		$updater->addExtensionUpdate( [
+			'MediaWiki\Extension\ScratchOAuth2\SOA2Hooks::fetchCasedUsernames'
+		] );
+		return true;
+	}
+
+	public static function fetchCasedUsernames( DatabaseUpdater $updater ) {
 		// add cased usernames for those who don't have them
 		$dbw = $updater->getDB();
 		$res = $dbw->select(
@@ -55,8 +63,9 @@ class SOA2Hooks {
 			['user_name_cased' => null]
 		);
 		foreach ($res as $row) {
-			SOA2Login::api( $res->user_name );
+			$username = $row->user_name;
+			$updater->output( "Fetching cased username for $username\n" );
+			SOA2Login::api( $username );
 		}
-		return true;
 	}
 }
