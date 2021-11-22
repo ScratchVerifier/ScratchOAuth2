@@ -21,18 +21,26 @@ class SOA2Login {
 		return $session->get( 'soa2_scratch_code' );
 	}
 	/**
+	 * Get and save user data from the API.
+	 * @param string $username the username to get the data for
+	 */
+	public static function api( string $username ) {
+		// get user data from API
+		$user = json_decode(file_get_contents(sprintf(
+			SOA2_USERS_API, urlencode($username))), true);
+		if (!$user) return null;
+		// save it to DB, possibly updating the case
+		SOA2DB::saveUser( $user['id'], $user['username'] );
+		return $user;
+	}
+	/**
 	 * Get the data needed to complete a login.
 	 * @param string $username the username to get the codes for
 	 */
 	public static function codes( string $username ) {
 		global $wgRequest;
-		// get user data from API
-		$user = json_decode(file_get_contents(sprintf(
-			SOA2_USERS_API, urlencode($username))), true);
-		if (!$user) return null;
-		// save user data
+		$user = self::api( $username );
 		$username = $user['username'];
-		SOA2DB::saveUser( $user['id'], $user['username'] );
 		// actually do the code generation
 		$session = $wgRequest->getSession();
 		$session->persist();
