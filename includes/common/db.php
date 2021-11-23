@@ -42,7 +42,8 @@ class SOA2DB {
 	public static function saveUser( int $user_id, string $username ) {
 		$values = [
 			'user_id' => $user_id,
-			'user_name' => strtolower($username)
+			'user_name' => strtolower($username),
+			'user_name_cased' => $username
 		];
 		self::dbw()->upsert(
 			'soa2_scratchers', $values,
@@ -52,14 +53,14 @@ class SOA2DB {
 	public static function getUserById( int $user_id ) {
 		return self::dbr()->selectRow(
 			'soa2_scratchers',
-			['user_id', 'user_name'],
+			['user_id', 'user_name', 'user_name_cased'],
 			['user_id' => $user_id]
 		);
 	}
 	public static function getUserByName( string $username ) {
 		return self::dbr()->selectRow(
 			'soa2_scratchers',
-			['user_id', 'user_name'],
+			['user_id', 'user_name', 'user_name_cased'],
 			['user_name' => strtolower($username)]
 		);
 	}

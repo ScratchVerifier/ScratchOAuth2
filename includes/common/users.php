@@ -25,11 +25,12 @@ class SOA2Users {
 	/**
 	 * Get a username by ID
 	 * @param int $user_id the user ID
+	 * @param bool $cased if false, return the username in lowercase (default true)
 	 * @return string|null the username, or null if not found
 	 */
-	public static function getName( int $user_id ) {
+	public static function getName( int $user_id, bool $cased = true ) {
 		$user = SOA2DB::getUserById( $user_id );
-		return $user ? $user->user_name : null;
+		return $user ? ($cased ? $user->user_name_cased : $user->user_name) : null;
 	}
 	public static function getID( string $user_name ) {
 		$user = SOA2DB::getUserByName( $user_name );
