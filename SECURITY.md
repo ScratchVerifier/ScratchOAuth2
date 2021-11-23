@@ -7,4 +7,4 @@ Examples: `master`, `develop`, `admin-panel`
 
 ## Reporting a Vulnerability
 
-Please mail me@smileycreations15.com about the security issue. 
+Please mail `hi [at] semisol [dot] dev` about the security issue. 
