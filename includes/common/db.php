@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\ScratchOAuth2\Common;
 
 use Database;
+use MediaWiki\MediaWikiServices;
 
 class SOA2DB {
 	protected static $dbw;
@@ -24,7 +25,12 @@ class SOA2DB {
 	}
 	protected static function dbFactory() {
 		global $wgSOA2DBtype, $wgSOA2DBserver, $wgSOA2DBuser, $wgSOA2DBpassword, $wgSOA2DBname, $wgSOA2DBprefix;
-		if (!$wgSOA2DBtype) return wfGetDB;
+		if (!$wgSOA2DBtype) {
+			$loadBalancer = MediaWikiServices::getInstance()->getDBLoadBalancer();
+			return static function ( $index ) use ( $loadBalancer ) {
+				return $loadBalancer->getConnection( $index );
+			};
+		};
 		$type = $wgSOA2DBtype;
 		$params = [
 			'host' => $wgSOA2DBserver,
@@ -47,7 +53,7 @@ class SOA2DB {
 		];
 		self::dbw()->upsert(
 			'soa2_scratchers', $values,
-			array_keys($values), $values
+			'user_id', $values
 		);
 	}
 	public static function getUserById( int $user_id ) {
