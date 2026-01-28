@@ -2,7 +2,8 @@
 
 namespace MediaWiki\Extension\ScratchOAuth2\Common;
 
-use Database;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
 use MediaWiki\MediaWikiServices;
 
 class SOA2DB {
@@ -12,14 +13,14 @@ class SOA2DB {
 	public static function dbw() {
 		if (!isset(self::$dbw)) {
 			$func = self::dbFactory();
-			self::$dbw = $func( DB_MASTER );
+			self::$dbw = $func( ILoadBalancer::DB_MASTER );
 		}
 		return self::$dbw;
 	}
 	public static function dbr() {
 		if (!isset(self::$dbr)) {
 			$func = self::dbFactory();
-			self::$dbr = $func( DB_REPLICA );
+			self::$dbr = $func( ILoadBalancer::DB_REPLICA );
 		}
 		return self::$dbr;
 	}
@@ -31,17 +32,18 @@ class SOA2DB {
 				return $loadBalancer->getConnection( $index );
 			};
 		};
+		$factory = MediaWikiServices::getInstance()->getDatabaseFactory();
 		$type = $wgSOA2DBtype;
 		$params = [
 			'host' => $wgSOA2DBserver,
 			'user' => $wgSOA2DBuser,
 			'password' => $wgSOA2DBpassword,
 			'dbname' => $wgSOA2DBname,
-			'flags' => DBO_DEFAULT,
+			'flags' => IDatabase::DBO_DEFAULT,
 			'tablePrefix' => $wgSOA2DBprefix
 		];
-		return static function ( $index ) use ( $type, $params ) {
-			return Database::factory( $type, $params );
+		return static function ( $index ) use ( $type, $params, $factory ) {
+			return $factory->create( $type, $params );
 		};
 	}
 	// login methods
