@@ -13,7 +13,7 @@ class SOA2DB {
 	public static function dbw() {
 		if (!isset(self::$dbw)) {
 			$func = self::dbFactory();
-			self::$dbw = $func( ILoadBalancer::DB_MASTER );
+			self::$dbw = $func( ILoadBalancer::DB_PRIMARY );
 		}
 		return self::$dbw;
 	}
